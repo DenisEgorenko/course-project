@@ -206,6 +206,17 @@ app.put('/videos/:id', (req: RequestWithParamsAndBody<videoURImodel, UpdateVideo
         })
     }
 
+
+    if (req.body.publicationDate) {
+        const dateParsed = new Date(Date.parse(req.body.publicationDate));
+        if (dateParsed.toISOString() !== req.body.publicationDate) {
+            error.errorsMessages.push({
+                message: 'Wrong Date Format',
+                field: 'publicationDate'
+            })
+        }
+    }
+
     if (error.errorsMessages.length) {
         res.status(httpStatus.BAD_REQUEST_400)
         res.json(error)
