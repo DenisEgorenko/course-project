@@ -36,26 +36,26 @@ export type dbType = { videos: Array<videoType> }
 
 export const db: dbType = {
     videos: [
-        {
-            id: +(new Date()),
-            title: 'Видео',
-            author: 'John',
-            canBeDownloaded: false,
-            minAgeRestriction: null,
-            createdAt: new Date().toISOString(),
-            publicationDate: new Date().toISOString(),
-            availableResolutions: [resolutions.P240, resolutions.P360]
-        },
-        {
-            id: +(new Date()),
-            title: 'Видео',
-            author: 'John',
-            canBeDownloaded: false,
-            minAgeRestriction: null,
-            createdAt: new Date().toISOString(),
-            publicationDate: new Date().toISOString(),
-            availableResolutions: [resolutions.P240, resolutions.P360]
-        }
+        // {
+        //     id: +(new Date()),
+        //     title: 'Видео',
+        //     author: 'John',
+        //     canBeDownloaded: false,
+        //     minAgeRestriction: null,
+        //     createdAt: new Date().toISOString(),
+        //     publicationDate: new Date().toISOString(),
+        //     availableResolutions: [resolutions.P240, resolutions.P360]
+        // },
+        // {
+        //     id: +(new Date()),
+        //     title: 'Видео',
+        //     author: 'John',
+        //     canBeDownloaded: false,
+        //     minAgeRestriction: null,
+        //     createdAt: new Date().toISOString(),
+        //     publicationDate: new Date().toISOString(),
+        //     availableResolutions: [resolutions.P240, resolutions.P360]
+        // }
     ]
 }
 
