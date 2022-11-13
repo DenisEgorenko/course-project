@@ -61,8 +61,23 @@ describe('Video CRUD tests', function () {
 
     });
 
-    // Read
+    it('should return error because of wrong resolution', async function () {
 
+        const newVideoWithMistake: createVideoInputModel = {
+            title: "Новое Видео2",
+            author: 'Новый Автор2',
+            // @ts-ignore
+            availableResolutions: [resolutions.P1080, 'invalid']
+        }
+
+        const response = await request(app)
+            .post('/videos')
+            .send(newVideoWithMistake)
+            .expect(httpStatus.BAD_REQUEST_400)
+
+    });
+
+    // Read
 
     it('should return all videos', async function () {
         const allVideos = await request(app)

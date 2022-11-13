@@ -4,6 +4,8 @@ import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from "./ty
 import {createVideoInputModel} from "./models/CreateVideoInputModel";
 import {videoURImodel} from "./models/videoURImodel";
 import {UpdateVideoInputModel} from "./models/UpdateVideoInputModel";
+import {isBoolean} from "util";
+import {isBooleanObject} from "util/types";
 
 const express = require('express')
 export const app = express()
@@ -87,48 +89,58 @@ app.get('/videos/:id', (req: RequestWithParams<videoURImodel>, res: Response<vid
 app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoType>) => {
 
 
-    if (!req.body.title || !req.body.author || req.body.title.length > 40 || req.body.author.length > 20) {
+    let errorArray: ErrorType = {
+        errorsMessages: []
+    }
 
-        let errorArray: ErrorType = {
-            errorsMessages: []
-        }
+    if (!req.body.title) {
+        errorArray.errorsMessages.push(
+            {
+                message: 'Request should consist title',
+                field: 'title'
+            }
+        )
+    } else if (req.body.title.length > 40) {
+        errorArray.errorsMessages.push(
+            {
+                message: 'Length of title should be less than 40 ',
+                field: 'title'
+            }
+        )
+    }
 
-        if (!req.body.title) {
-            errorArray.errorsMessages.push(
-                {
-                    message: 'Request should consist title',
-                    field: 'title'
-                }
-            )
-        } else if (req.body.title.length > 40) {
-            errorArray.errorsMessages.push(
-                {
-                    message: 'Length of title should be less than 40 ',
-                    field: 'title'
-                }
-            )
-        }
+    if (!req.body.author) {
+        errorArray.errorsMessages.push(
+            {
+                message: 'Request should consist author name',
+                field: 'author'
+            }
+        )
+    } else if (req.body.author.length > 20) {
+        errorArray.errorsMessages.push(
+            {
+                message: 'Length of author name should be less than 20 ',
+                field: 'author'
+            }
+        )
+    }
 
-        if (!req.body.author) {
-            errorArray.errorsMessages.push(
-                {
-                    message: 'Request should consist author name',
-                    field: 'author'
-                }
-            )
-        } else if (req.body.author.length > 20) {
-            errorArray.errorsMessages.push(
-                {
-                    message: 'Length of author name should be less than 20 ',
-                    field: 'author'
-                }
-            )
-        }
 
+    if (req.body.availableResolutions
+        .some(resolution => !Object.keys(resolutions).includes(resolution)
+        )) {
+        errorArray.errorsMessages.push({
+            message: 'Invalid resolution',
+            field: 'availableResolutions'
+        })
+    }
+
+    if (errorArray.errorsMessages.length) {
         res.status(httpStatus.BAD_REQUEST_400)
         res.json(errorArray)
         return
     }
+
 
     const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
 
@@ -152,39 +164,54 @@ app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<
 
 app.put('/videos/:id', (req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) => {
 
-    if ((!req.body.title || req.body.title.length > 40)
-        || (!req.body.author || req.body.author.length > 20)
-        || (req.body.minAgeRestriction && (req.body.minAgeRestriction > 18 || req.body.minAgeRestriction < 1))) {
 
-        const error: ErrorType = {
-            errorsMessages: []
-        }
+    const error: ErrorType = {
+        errorsMessages: []
+    }
 
-        if (req.body.minAgeRestriction && (req.body.minAgeRestriction > 18 || req.body.minAgeRestriction < 1)) {
-            error.errorsMessages.push({
-                field: 'minAgeRestriction',
-                message: 'age should be more than 1 and less than 19'
-            })
-        }
+    if (req.body.minAgeRestriction && (req.body.minAgeRestriction > 18 || req.body.minAgeRestriction < 1)) {
+        error.errorsMessages.push({
+            field: 'minAgeRestriction',
+            message: 'age should be more than 1 and less than 19'
+        })
+    }
 
-        if (!req.body.title || req.body.title.length > 40) {
-            error.errorsMessages.push({
-                field: 'title',
-                message: 'title is required or longer than 40'
-            })
-        }
+    if (!req.body.title || req.body.title.length > 40) {
+        error.errorsMessages.push({
+            field: 'title',
+            message: 'title is required or longer than 40'
+        })
+    }
 
-        if (!req.body.author || req.body.author.length > 20) {
-            error.errorsMessages.push({
-                field: 'author',
-                message: 'author is required or longer than 20'
-            })
-        }
+    if (!req.body.author || req.body.author.length > 20) {
+        error.errorsMessages.push({
+            field: 'author',
+            message: 'author is required or longer than 20'
+        })
+    }
 
+    if (req.body.availableResolutions && req.body.availableResolutions
+        .some(resolution => !Object.keys(resolutions).includes(resolution)
+        )) {
+        error.errorsMessages.push({
+            message: 'Invalid resolution',
+            field: 'availableResolutions'
+        })
+    }
+
+    if (typeof req.body.canBeDownloaded !== "boolean") {
+        error.errorsMessages.push({
+            message: 'Invalid canBeDownloaded',
+            field: 'canBeDownloaded'
+        })
+    }
+
+    if (error.errorsMessages.length) {
         res.status(httpStatus.BAD_REQUEST_400)
         res.json(error)
         return
     }
+
 
     const video = db.videos.find(video => video.id === +req.params.id)
 
@@ -232,8 +259,7 @@ app.delete('/videos/:id', (req: RequestWithParams<videoURImodel>, res: Response)
         return
     }
 
-    const videoWithoutDeleted = db.videos.filter(video => video.id !== +req.params.id)
-    db.videos = videoWithoutDeleted
+    db.videos = db.videos.filter(video => video.id !== +req.params.id)
     res.sendStatus(httpStatus.NO_CONTENT_204)
 })
 
