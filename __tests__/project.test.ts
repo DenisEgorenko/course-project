@@ -36,12 +36,12 @@ describe('Video CRUD tests', function () {
         const response = await request(app)
             .post('/videos')
             .send(newVideo)
-            .expect(200)
+            .expect(httpStatus.CREATED_201)
 
         const response2 = await request(app)
             .post('/videos')
-            .send(newVideo)
-            .expect(httpStatus.OK_200)
+            .send(newVideo2)
+            .expect(httpStatus.CREATED_201)
 
         expect(response.body).toEqual(
             {

@@ -9,7 +9,11 @@ export enum httpStatus {
 }
 
 
-export type ErrorType = {
+
+type errorMessage = {
     message: string,
     field: string
+}
+export type ErrorType = {
+    errorsMessages: errorMessage[]
 }

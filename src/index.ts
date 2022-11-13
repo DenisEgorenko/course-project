@@ -84,22 +84,24 @@ app.get('/videos/:id', (req: RequestWithParams<videoURImodel>, res: Response<vid
 
 // Create videos
 
-app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<Array<ErrorType> | videoType>) => {
+app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoType>) => {
 
 
     if (!req.body.title || !req.body.author || req.body.title.length > 40 || req.body.author.length > 20) {
 
-        let errorArray: Array<ErrorType> = []
+        let errorArray: ErrorType = {
+            errorsMessages: []
+        }
 
         if (!req.body.title) {
-            errorArray.push(
+            errorArray.errorsMessages.push(
                 {
                     message: 'Request should consist title',
                     field: 'title'
                 }
             )
         } else if (req.body.title.length > 40) {
-            errorArray.push(
+            errorArray.errorsMessages.push(
                 {
                     message: 'Length of title should be less than 40 ',
                     field: 'title'
@@ -108,14 +110,14 @@ app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<
         }
 
         if (!req.body.author) {
-            errorArray.push(
+            errorArray.errorsMessages.push(
                 {
                     message: 'Request should consist author name',
                     field: 'author'
                 }
             )
         } else if (req.body.author.length > 20) {
-            errorArray.push(
+            errorArray.errorsMessages.push(
                 {
                     message: 'Length of author name should be less than 20 ',
                     field: 'author'
@@ -141,37 +143,39 @@ app.post('/videos', (req: RequestWithBody<createVideoInputModel>, res: Response<
         availableResolutions: req.body.availableResolutions
     }
     db.videos.push(newVideo)
-    res.status(httpStatus.OK_200)
+    res.status(httpStatus.CREATED_201)
     res.json(newVideo)
 })
 
 
 // Update Videos
 
-app.put('/videos/:id', (req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType[]>) => {
+app.put('/videos/:id', (req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) => {
 
     if ((!req.body.title || req.body.title.length > 40)
         || (!req.body.author || req.body.author.length > 20)
         || (req.body.minAgeRestriction && (req.body.minAgeRestriction > 18 || req.body.minAgeRestriction < 1))) {
 
-        const error: ErrorType[] = []
+        const error: ErrorType = {
+            errorsMessages: []
+        }
 
         if (req.body.minAgeRestriction && (req.body.minAgeRestriction > 18 || req.body.minAgeRestriction < 1)) {
-            error.push({
+            error.errorsMessages.push({
                 field: 'minAgeRestriction',
                 message: 'age should be more than 1 and less than 19'
             })
         }
 
         if (!req.body.title || req.body.title.length > 40) {
-            error.push({
+            error.errorsMessages.push({
                 field: 'title',
                 message: 'title is required or longer than 40'
             })
         }
 
         if (!req.body.author || req.body.author.length > 20) {
-            error.push({
+            error.errorsMessages.push({
                 field: 'author',
                 message: 'author is required or longer than 20'
             })
