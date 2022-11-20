@@ -40,7 +40,7 @@ const availableResolutionsValidationRequired = body('availableResolutions').isAr
     !value.some((resolution: string) => !Object.keys(resolutions).includes(resolution))
 )).withMessage('Invalid availableResolutions')
 
-const publicationDateValidation = body('publicationDate').optional().isISO8601().withMessage('Invalid availableResolutions')
+const publicationDateValidation = body('publicationDate').optional().isString().isISO8601().withMessage('Invalid availableResolutions')
 
 
 
