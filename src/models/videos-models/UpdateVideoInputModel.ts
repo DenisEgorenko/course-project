@@ -1,4 +1,4 @@
-import {resolutions} from "../index";
+import {resolutions} from '../resolutionsModel';
 
 export type UpdateVideoInputModel = {
     title: string
