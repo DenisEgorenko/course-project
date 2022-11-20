@@ -13,12 +13,12 @@ import {resolutions} from '../models/resolutionsModel';
 export const videosRouter = Router({})
 
 
-const titleValidation = body('title').notEmpty().isLength({
+const titleValidation = body('title').isLength({
     min: 1,
     max: 40
 }).withMessage('Request should consist title with length less than 40')
 
-const authorValidation = body('author').notEmpty().isLength({
+const authorValidation = body('author').isLength({
     min: 1,
     max: 20
 }).withMessage('author is required or longer than 20')
