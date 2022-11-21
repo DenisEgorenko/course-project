@@ -20,23 +20,23 @@ import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel'
 export const postsRouter = Router({})
 
 
-const titleValidation = body('title').isLength({
+const titleValidation = body('title').trim().isLength({
     min: 1,
     max: 30
 }).withMessage('Request should consist title with length less than 30')
 
 
-const shortDescriptionValidation = body('shortDescription').isLength({
+const shortDescriptionValidation = body('shortDescription').trim().isLength({
     min: 1,
     max: 100
 }).withMessage('Request should consist short Description with length less than 100')
 
-const contentValidation = body('content').isLength({
+const contentValidation = body('content').trim().isLength({
     min: 1,
     max: 1000
 }).withMessage('Request should consist content with length less than 1000')
 
-const blogIdValidation = body('blogId').isLength({
+const blogIdValidation = body('blogId').trim().isLength({
     min: 1
 }).withMessage('Request should consist content with length more than 1')
 
@@ -97,7 +97,10 @@ postsRouter.put('/:id',
     })
 
 // Delete Videos
-postsRouter.delete('/:id', (req: RequestWithParams<postsURImodel>, res: Response) => {
+postsRouter.delete('/:id',
+    authorisationMiddleware,
+    inputValidationMiddleware,
+    (req: RequestWithParams<postsURImodel>, res: Response) => {
 
     if (!req.params.id) {
         res.sendStatus(httpStatus.BAD_REQUEST_400)

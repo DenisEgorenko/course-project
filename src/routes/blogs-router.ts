@@ -16,13 +16,13 @@ import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel'
 export const blogsRouter = Router({})
 
 
-const blogNameValidation = body('name').isLength({
+const blogNameValidation = body('name').trim().isLength({
     min: 1,
     max: 15
 }).withMessage('Request should consist title with length less than 15')
 
 
-const blogDescriptionValidation = body('description').isLength({
+const blogDescriptionValidation = body('description').trim().isLength({
     min: 1,
     max: 500
 }).withMessage('Request should consist description with length less than 500')
@@ -88,20 +88,23 @@ blogsRouter.put('/:id',
     })
 
 // Delete Videos
-blogsRouter.delete('/:id', (req: RequestWithParams<blogsURImodel>, res: Response) => {
+blogsRouter.delete('/:id',
+    authorisationMiddleware,
+    inputValidationMiddleware,
+    (req: RequestWithParams<blogsURImodel>, res: Response) => {
 
-    if (!req.params.id) {
-        res.sendStatus(httpStatus.BAD_REQUEST_400)
-        return;
-    }
+        if (!req.params.id) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
 
-    const deleteVideo = blogsRepositories.deleteBlog(req.params.id)
+        const deleteVideo = blogsRepositories.deleteBlog(req.params.id)
 
-    if (!deleteVideo) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
-    } else {
-        res.sendStatus(httpStatus.NO_CONTENT_204)
-    }
+        if (!deleteVideo) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        } else {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        }
 
-})
+    })

@@ -76,10 +76,23 @@ describe('Posts CRUD tests', function () {
             blogId: 'ID блога'
         }
 
+        const newPostWithMistakeEmpty: CreatePostInputModel = {
+            title: '          ',
+            shortDescription: 'Короткое описание',
+            content: 'Контент',
+            blogId: 'ID блога'
+        }
+
         const response = await request(app)
             .post('/posts')
             .set('Authorization', `Basic ${authToken}`)
             .send(newPostWithMistake)
+            .expect(httpStatus.BAD_REQUEST_400)
+
+        const response1 = await request(app)
+            .post('/posts')
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newPostWithMistakeEmpty)
             .expect(httpStatus.BAD_REQUEST_400)
     });
 
