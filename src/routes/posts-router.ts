@@ -1,17 +1,10 @@
 import {Request, Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from '../types/requestTypes';
-import {videoURImodel} from '../models/videos-models/videoURImodel';
-import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videosRepositories} from '../repositories/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
-import {blogType, postType} from '../repositories/dataBase';
-import {blogsRepositories} from '../repositories/blogs-repositories';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsURImodel} from '../models/blogs-models/blogsURImodel';
+import {postType} from '../repositories/dataBase';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 import {postsRepositories} from '../repositories/posts-repositories';
 import {postsURImodel} from '../models/posts-models/postsURImodel';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
@@ -36,9 +29,15 @@ const contentValidation = body('content').trim().isLength({
     max: 1000
 }).withMessage('Request should consist content with length less than 1000')
 
-const blogIdValidation = body('blogId').trim().isLength({
-    min: 1
-}).withMessage('Request should consist content with length more than 1')
+const blogIdValidation = body('blogId')
+    .trim()
+    .isLength({
+        min: 1
+    })
+    .custom(value => {
+        return postsRepositories.ifBlogIdExist(value)
+    })
+    .withMessage('Request should consist content with length more than 1')
 
 // Read
 postsRouter.get('/', (req: Request, res: Response<Array<postType>>) => {
@@ -102,18 +101,18 @@ postsRouter.delete('/:id',
     inputValidationMiddleware,
     (req: RequestWithParams<postsURImodel>, res: Response) => {
 
-    if (!req.params.id) {
-        res.sendStatus(httpStatus.BAD_REQUEST_400)
-        return;
-    }
+        if (!req.params.id) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
 
-    const deleteVideo = postsRepositories.deletePost(req.params.id)
+        const deleteVideo = postsRepositories.deletePost(req.params.id)
 
-    if (!deleteVideo) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
-    } else {
-        res.sendStatus(httpStatus.NO_CONTENT_204)
-    }
+        if (!deleteVideo) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        } else {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        }
 
-})
+    })

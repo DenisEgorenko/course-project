@@ -1,7 +1,7 @@
 import request from 'supertest'
 import {app} from '../src';
 import {httpStatus} from '../src/types/responseTypes';
-import {db, postType} from '../src/repositories/dataBase';
+import {blogType, db, postType} from '../src/repositories/dataBase';
 import {CreateBlogInputModel} from '../src/models/blogs-models/CreateBlogInputModel';
 import {UpdateBlogInputModel} from '../src/models/blogs-models/UpdateBlogInputModel';
 import {CreatePostInputModel} from '../src/models/posts-models/CreatePostInputModel';
@@ -25,32 +25,48 @@ describe('Posts CRUD tests', function () {
     let createdPost1: postType
     let createdPost2: postType
 
+    let blog: blogType
+
     it('should add post to DB', async function () {
 
-        const newBlog: CreatePostInputModel = {
+        const newBlog: CreateBlogInputModel = {
+            name: 'Имя блога 1',
+            description: 'Описание 1',
+            websiteUrl: 'https://www.example.com'
+        }
+
+        const responseBlog = await request(app)
+            .post('/blogs')
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newBlog)
+            .expect(httpStatus.CREATED_201)
+
+        blog = responseBlog.body
+
+        const newPost: CreatePostInputModel = {
             title: 'Заголовок поста',
             shortDescription: 'Короткое описание',
             content: 'Контент',
-            blogId: 'ID блога'
+            blogId: blog.id
         }
 
-        const newBlog2: CreatePostInputModel = {
+        const newPost2: CreatePostInputModel = {
             title: 'Заголовок поста 2',
             shortDescription: 'Короткое описание 2',
             content: 'Контент 2',
-            blogId: 'ID блога 2'
+            blogId: blog.id
         }
 
         const response = await request(app)
             .post('/posts')
             .set('Authorization', `Basic ${authToken}`)
-            .send(newBlog)
+            .send(newPost)
             .expect(httpStatus.CREATED_201)
 
         const response2 = await request(app)
             .post('/posts')
             .set('Authorization', `Basic ${authToken}`)
-            .send(newBlog2)
+            .send(newPost2)
             .expect(httpStatus.CREATED_201)
 
         expect(response.body).toEqual(
@@ -59,12 +75,13 @@ describe('Posts CRUD tests', function () {
                 title: 'Заголовок поста',
                 shortDescription: 'Короткое описание',
                 content: 'Контент',
-                blogId: 'ID блога',
+                blogId: blog.id,
                 blogName: ''
             }
         )
         createdPost1 = response.body
         createdPost2 = response2.body
+
     });
 
     it('should return error because of wrong title', async function () {
@@ -73,14 +90,14 @@ describe('Posts CRUD tests', function () {
             title: '',
             shortDescription: 'Короткое описание',
             content: 'Контент',
-            blogId: 'ID блога'
+            blogId: blog.id
         }
 
         const newPostWithMistakeEmpty: CreatePostInputModel = {
             title: '          ',
             shortDescription: 'Короткое описание',
             content: 'Контент',
-            blogId: 'ID блога'
+            blogId: blog.id
         }
 
         const response = await request(app)
@@ -102,7 +119,7 @@ describe('Posts CRUD tests', function () {
             title: 'Заголовок поста',
             shortDescription: '',
             content: 'Контент',
-            blogId: 'ID блога'
+            blogId: blog.id
         }
 
         const response = await request(app)
@@ -118,7 +135,7 @@ describe('Posts CRUD tests', function () {
             title: 'Заголовок поста',
             shortDescription: 'Короткое описание',
             content: '',
-            blogId: 'ID блога'
+            blogId: blog.id
         }
 
         const response = await request(app)
@@ -130,18 +147,37 @@ describe('Posts CRUD tests', function () {
 
     it('should return error because of wrong blogId', async function () {
 
-        const newPostWithMistake: CreatePostInputModel = {
+        const newPostWithMistakeWrongID: CreatePostInputModel = {
             title: 'Заголовок поста',
             shortDescription: 'Короткое описание',
             content: 'Контент',
-            blogId: ''
+            blogId: 'blog.id'
         }
 
-        const response = await request(app)
+        const newPostWithMistakeRightID: CreatePostInputModel = {
+            title: 'Заголовок поста',
+            shortDescription: 'Короткое описание',
+            content: 'Контент',
+            blogId: blog.id
+        }
+
+        const response1 = await request(app)
             .post('/posts')
             .set('Authorization', `Basic ${authToken}`)
-            .send(newPostWithMistake)
+            .send(newPostWithMistakeWrongID)
             .expect(httpStatus.BAD_REQUEST_400)
+
+        const response2 = await request(app)
+            .post('/posts')
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newPostWithMistakeRightID)
+            .expect(httpStatus.CREATED_201)
+
+
+        const response3 = await request(app)
+            .delete(`/posts/${response2.body.id}`)
+            .set('Authorization', `Basic ${authToken}`)
+            .expect(httpStatus.NO_CONTENT_204)
     });
 
     // Read
@@ -155,6 +191,7 @@ describe('Posts CRUD tests', function () {
         expect(allBlogs.body.length).toBe(2)
         expect(allBlogs.body[0].title).toBe(createdPost1.title)
         expect(allBlogs.body[1].title).toBe(createdPost2.title)
+
     });
 
     it('should return post by id', async function () {
@@ -179,7 +216,7 @@ describe('Posts CRUD tests', function () {
             title: 'Заголовок поста обновленный',
             shortDescription: 'описание обновленное',
             content: 'Контент обновленный',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         await request(app)
@@ -202,14 +239,14 @@ describe('Posts CRUD tests', function () {
             title: '',
             shortDescription: 'описание обновленное',
             content: 'Контент обновленный',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         const dataForUpdateWithMistakeLength: UpdatePostInputModel = {
             title: '12345678910123456789101234567891012345678910',
             shortDescription: 'описание обновленное',
             content: 'Контент обновленный',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         await request(app)
@@ -233,14 +270,14 @@ describe('Posts CRUD tests', function () {
             title: 'Заголовок поста',
             shortDescription: '',
             content: 'Контент обновленный',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         const dataForUpdateWithMistakeLength: UpdatePostInputModel = {
             title: 'Заголовок поста',
             shortDescription: '123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910',
             content: 'Контент обновленный',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         await request(app)
@@ -263,14 +300,14 @@ describe('Posts CRUD tests', function () {
             title: 'Заголовок поста',
             shortDescription: 'описание',
             content: '',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         const dataForUpdateWithMistakeLength: UpdatePostInputModel = {
             title: 'Заголовок поста',
             shortDescription: 'описание',
             content: '123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910123456789101234567891012345678910',
-            blogId: 'ID блога обновленный'
+            blogId: blog.id
         }
 
         await request(app)

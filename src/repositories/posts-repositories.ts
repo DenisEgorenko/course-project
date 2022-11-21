@@ -1,6 +1,4 @@
-import {blogType, db, postType} from './dataBase';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
+import {db, postType} from './dataBase';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 
@@ -58,6 +56,9 @@ export const postsRepositories = {
             db.posts = db.posts.filter(post => post.id !== id)
             return true
         }
-    }
+    },
 
+    ifBlogIdExist(value: string) {
+        return db.blogs.some(blog => (blog.id === value));
+    }
 }
