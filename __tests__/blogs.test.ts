@@ -72,10 +72,23 @@ describe('Video CRUD tests', function () {
             websiteUrl: 'https://www.example.com'
         }
 
+        const newBlogWithMistakeEmpty: CreateBlogInputModel = {
+            name: '          ',
+            description: 'Описание 1',
+            websiteUrl: 'https://www.example.com'
+        }
+
         const response = await request(app)
             .post('/blogs')
             .set('Authorization', `Basic ${authToken}`)
             .send(newBlogWithMistake)
+            .expect(httpStatus.BAD_REQUEST_400)
+
+
+        const response2 = await request(app)
+            .post('/blogs')
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newBlogWithMistakeEmpty)
             .expect(httpStatus.BAD_REQUEST_400)
     });
 
@@ -102,11 +115,24 @@ describe('Video CRUD tests', function () {
             websiteUrl: 'https/www.example.com'
         }
 
+        const newBlogWithMistakeShort: CreateBlogInputModel = {
+            name: 'dddd',
+            description: 'ddd',
+            websiteUrl: 'https/www.example.com'
+        }
+
         const response = await request(app)
             .post('/blogs')
             .set('Authorization', `Basic ${authToken}`)
             .send(newBlogWithMistake)
             .expect(httpStatus.BAD_REQUEST_400)
+
+        const response1 = await request(app)
+            .post('/blogs')
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newBlogWithMistakeShort)
+            .expect(httpStatus.BAD_REQUEST_400)
+
     });
 
     // Read

@@ -7,7 +7,7 @@ export const inputValidationMiddleware = (req: Request<any>, res: Response<Error
 
     if (!errors.isEmpty()) {
         return res.status(400).json({
-            errorsMessages: errors.array().map(erorr => ({
+            errorsMessages: errors.array({onlyFirstError: true}).map(erorr => ({
                 message: erorr.msg,
                 field: erorr.param
             }))
