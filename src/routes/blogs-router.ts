@@ -27,7 +27,10 @@ const blogDescriptionValidation = body('description').isLength({
     max: 500
 }).withMessage('Request should consist description with length less than 500')
 
-const UrlValidation = body('websiteUrl').matches(`^https://([a-zA-Z0-9_-]+\\.)+[a-zA-Z0-9_-]+(\\/[a-zA-Z0-9_-]+)*\\/?$`).withMessage('Request should consist websiteUrl')
+const UrlValidation = body('websiteUrl').isLength({
+    min: 1,
+    max: 100
+}).matches(`^https://([a-zA-Z0-9_-]+\\.)+[a-zA-Z0-9_-]+(\\/[a-zA-Z0-9_-]+)*\\/?$`).withMessage('Request should consist websiteUrl')
 
 
 // Read

@@ -5,6 +5,12 @@ const auth = {login: 'admin', password: 'qwerty'}
 
 export const authorisationMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
+    const authType = (req.headers.authorization || '').split(' ')[0] || ''
+
+    if (authType !== 'Basic') {
+        res.status(401).send('Authentication wrong.')
+    }
+
     const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
 
     const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':')
@@ -14,6 +20,5 @@ export const authorisationMiddleware = (req: Request, res: Response, next: NextF
         return next()
     }
 
-    res.set('WWW-Authenticate', 'Basic realm="401"') // change this
     res.status(401).send('Authentication required.')
 }
