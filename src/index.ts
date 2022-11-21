@@ -3,6 +3,7 @@ import {httpStatus} from './types/responseTypes';
 import {videosRouter} from './routes/videos-router';
 import {db} from './repositories/dataBase';
 import {blogsRouter} from './routes/blogs-router';
+import {postsRouter} from './routes/posts-router';
 
 const express = require('express')
 export const app = express()
@@ -13,6 +14,7 @@ app.use(express.json())
 // Videos CRUD
 app.use('/videos', videosRouter)
 app.use('/blogs', blogsRouter)
+app.use('/posts', postsRouter)
 
 
 // Testing method

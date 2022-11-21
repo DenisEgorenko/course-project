@@ -1,4 +1,4 @@
-import {resolutions} from '../models/resolutionsModel';
+import {resolutions} from '../models/videos-models/resolutionsModel';
 
 export type videoType = {
     id: number,
@@ -10,10 +10,28 @@ export type videoType = {
     publicationDate: string
     availableResolutions: Array<resolutions>
 }
+
+export type blogType = {
+    id: string,
+    name: string
+    description: string,
+    websiteUrl: string
+}
+
+export type postType = {
+    id: string,
+    title: string
+    shortDescription: string,
+    content: string,
+    blogId: string,
+    blogName: string,
+}
+
+
 export type dbType = {
     videos: Array<videoType>,
-    blogs: any[],
-    posts: any[]
+    blogs: Array<blogType>,
+    posts: Array<postType>,
 }
 
 export const db: dbType = {

@@ -8,7 +8,7 @@ import {videosRepositories} from '../repositories/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {videoType} from '../repositories/dataBase';
-import {resolutions} from '../models/resolutionsModel';
+import {resolutions} from '../models/videos-models/resolutionsModel';
 
 export const videosRouter = Router({})
 

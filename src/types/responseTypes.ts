@@ -15,5 +15,5 @@ type errorMessage = {
     field: string
 }
 export type ErrorType = {
-    errors: any[]
+    errorsMessages: errorMessage[]
 }

@@ -4,7 +4,7 @@ import {createVideoInputModel} from '../src/models/videos-models/CreateVideoInpu
 import {httpStatus} from '../src/types/responseTypes';
 import {UpdateVideoInputModel} from '../src/models/videos-models/UpdateVideoInputModel';
 import {db, videoType} from '../src/repositories/dataBase';
-import {resolutions} from '../src/models/resolutionsModel';
+import {resolutions} from '../src/models/videos-models/resolutionsModel';
 
 describe('Video CRUD tests', function () {
 
@@ -303,8 +303,6 @@ describe('Video CRUD tests', function () {
             .put(`/videos/${createdVideo2.id}`)
             .send(dataForUpdateWithMistake)
             .expect(httpStatus.BAD_REQUEST_400)
-
-        console.log(res.body)
     });
 
     it('video should not be updated because of wrong publicationDate', async function () {

@@ -2,89 +2,81 @@ import {Request, Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from '../types/requestTypes';
 import {videoURImodel} from '../models/videos-models/videoURImodel';
-import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
 import {videosRepositories} from '../repositories/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
-import {videoType} from '../repositories/dataBase';
-import {resolutions} from '../models/resolutionsModel';
+import {blogType} from '../repositories/dataBase';
+import {blogsRepositories} from '../repositories/blogs-repositories';
+import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
+import {blogsURImodel} from '../models/blogs-models/blogsURImodel';
+import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
+import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 
 export const blogsRouter = Router({})
 
 
-const titleValidation = body('title').isLength({
+const blogNameValidation = body('name').isLength({
     min: 1,
-    max: 40
-}).withMessage('Request should consist title with length less than 40')
+    max: 15
+}).withMessage('Request should consist title with length less than 15')
 
-const authorValidation = body('author').isLength({
+
+const blogDescriptionValidation = body('description').isLength({
     min: 1,
-    max: 20
-}).withMessage('author is required or longer than 20')
+    max: 500
+}).withMessage('Request should consist description with length less than 500')
 
-const ageRestrictionValidation = body('minAgeRestriction').optional().isInt({
-    min: 1,
-    max: 18
-}).withMessage('age should be more than 1 and less than 19')
+const UrlValidation = body('websiteUrl').matches(`^https://([a-zA-Z0-9_-]+\\.)+[a-zA-Z0-9_-]+(\\/[a-zA-Z0-9_-]+)*\\/?$`).withMessage('Request should consist websiteUrl')
 
 
-const canBeDownloadedValidation = body('canBeDownloaded').optional().isBoolean().withMessage('Invalid canBeDownloaded')
-
-const availableResolutionsValidation = body('availableResolutions').optional().isArray().custom(value => (
-    !value.some((resolution: string) => !Object.keys(resolutions).includes(resolution))
-)).withMessage('Invalid availableResolutions')
-
-
-const availableResolutionsValidationRequired = body('availableResolutions').isArray().custom(value => (
-    !value.some((resolution: string) => !Object.keys(resolutions).includes(resolution))
-)).withMessage('Invalid availableResolutions')
-
-const publicationDateValidation = body('publicationDate').optional().isString().isISO8601().withMessage('Invalid publicationDate')
-
-
-blogsRouter.get('/', (req: Request, res: Response<Array<videoType>>) => {
+// Read
+blogsRouter.get('/', (req: Request, res: Response<Array<blogType>>) => {
     res.status(httpStatus.OK_200)
-    res.json(videosRepositories.getAllVideos())
+    res.json(blogsRepositories.getAllBlogs())
 })
 
-blogsRouter.get('/:id', (req: RequestWithParams<videoURImodel>, res: Response<videoType>) => {
+blogsRouter.get('/:id', (req: RequestWithParams<blogsURImodel>, res: Response<blogType>) => {
 
-    const foundVideos = videosRepositories.getVideoById(+req.params.id)
+    const foundBlog = blogsRepositories.getBlogById(req.params.id)
 
-    if (!foundVideos) {
+    if (!foundBlog) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
         return
     }
 
     res.status(httpStatus.OK_200)
-    res.json(foundVideos)
+    res.json(foundBlog)
 })
 
 // Create videos
 blogsRouter.post('/',
-    titleValidation,
-    authorValidation,
-    availableResolutionsValidationRequired,
+    authorisationMiddleware,
+    blogNameValidation,
+    blogDescriptionValidation,
+    UrlValidation,
     inputValidationMiddleware,
-    (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoType>) => {
+    (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
 
         res.status(httpStatus.CREATED_201)
-        res.json(videosRepositories.createNewVideo(req.body))
+        res.json(blogsRepositories.createNewBlog(req.body))
     })
 
 // Update Videos
 blogsRouter.put('/:id',
-    titleValidation,
-    authorValidation,
-    ageRestrictionValidation,
-    canBeDownloadedValidation,
-    availableResolutionsValidation,
-    publicationDateValidation,
+    authorisationMiddleware,
+    blogNameValidation,
+    blogDescriptionValidation,
+    UrlValidation,
     inputValidationMiddleware,
-    (req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) => {
+    (req: RequestWithParamsAndBody<blogsURImodel, UpdateBlogInputModel>, res: Response<ErrorType>) => {
 
-        if (!videosRepositories.updateVideo(req.params.id, req.body)) {
+        if (!req.params.id) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
+
+        if (!blogsRepositories.updateBlog(req.params.id, req.body)) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
             return;
         } else {
@@ -93,14 +85,14 @@ blogsRouter.put('/:id',
     })
 
 // Delete Videos
-blogsRouter.delete('/:id', (req: RequestWithParams<videoURImodel>, res: Response) => {
+blogsRouter.delete('/:id', (req: RequestWithParams<blogsURImodel>, res: Response) => {
 
     if (!req.params.id) {
         res.sendStatus(httpStatus.BAD_REQUEST_400)
         return;
     }
 
-    const deleteVideo = videosRepositories.deleteVideo(req.params.id)
+    const deleteVideo = blogsRepositories.deleteBlog(req.params.id)
 
     if (!deleteVideo) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
