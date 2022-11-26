@@ -7,18 +7,19 @@ import {blogType, db} from '../src/repositories/dataBase';
 import {resolutions} from '../src/models/videos-models/resolutionsModel';
 import {CreateBlogInputModel} from '../src/models/blogs-models/CreateBlogInputModel';
 import {UpdateBlogInputModel} from '../src/models/blogs-models/UpdateBlogInputModel';
+import {blogsDatabase} from '../src/repositories/blogs-repositories';
 
 
 const authToken = 'YWRtaW46cXdlcnR5'
 
-describe('Video CRUD tests', function () {
+describe('Blogs CRUD tests', function () {
 
     beforeAll(async () => {
         await request(app).delete('/testing/all-data').expect(httpStatus.NO_CONTENT_204)
     })
 
-    it('DB should empty', function () {
-        expect(db.blogs).toEqual([])
+    it('DB should empty', async function () {
+        expect(await blogsDatabase.find({}).toArray()).toEqual([])
     });
 
     // Create
@@ -35,8 +36,8 @@ describe('Video CRUD tests', function () {
         }
 
         const newBlog2: CreateBlogInputModel = {
-            name: 'Имя блога 1',
-            description: 'Описание 1',
+            name: 'Имя блога 2',
+            description: 'Описание 2',
             websiteUrl: 'https://www.example.com'
         }
 
@@ -54,10 +55,12 @@ describe('Video CRUD tests', function () {
 
         expect(response.body).toEqual(
             {
+                _id: expect.any(String),
                 id: expect.any(String),
                 name: newBlog.name,
                 description: newBlog.description,
-                websiteUrl: newBlog.websiteUrl
+                websiteUrl: newBlog.websiteUrl,
+                createdAt: expect.any(String)
             }
         )
         createdBlog1 = response.body
@@ -142,6 +145,8 @@ describe('Video CRUD tests', function () {
             .get('/blogs')
             .expect(httpStatus.OK_200)
 
+
+        console.log(allBlogs.body)
 
         expect(allBlogs.body.length).toBe(2)
         expect(allBlogs.body[0].name).toBe(createdBlog1.name)
@@ -253,7 +258,9 @@ describe('Video CRUD tests', function () {
             .set('Authorization', `Basic ${authToken}`)
             .expect(httpStatus.NO_CONTENT_204)
 
-        expect(db.blogs.length).toBe(1)
+        const res = await blogsDatabase.find({}).toArray()
+
+        expect(res.length).toBe(1)
     });
 
     it('should not delete Video if wrong id', async function () {

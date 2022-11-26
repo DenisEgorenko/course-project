@@ -1,15 +1,20 @@
-import {db, postType} from './dataBase';
+import {postType} from './dataBase';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
+import {dataBase} from '../database/db';
+import {blogsDatabase} from './blogs-repositories';
+
+
+export const postsDatabase = dataBase.collection<postType>('posts')
 
 
 export const postsRepositories = {
     async getAllPosts() {
-        return db.posts
+        return postsDatabase.find({}).toArray();
     },
 
     async getPostById(id: string) {
-        const foundPost = db.posts.filter(post => post.id === id)
+        const foundPost = await postsDatabase.find({id: id}).toArray()
         return foundPost[0]
     },
 
@@ -21,47 +26,42 @@ export const postsRepositories = {
             shortDescription: requestData.shortDescription,
             content: requestData.content,
             blogId: requestData.blogId,
-            blogName: ''
+            blogName: '',
+            createdAt: new Date()
         }
 
-        db.posts.push(newPost)
+        await postsDatabase.insertOne(newPost)
 
         return newPost
     },
 
     async updatePost(id: string, updateData: UpdatePostInputModel) {
 
-        const post = db.posts.find(post => post.id === id)
+        const result = await postsDatabase.updateOne(
+            {id: id},
+            {
+                $set: {
+                    title: updateData.title,
+                    shortDescription: updateData.shortDescription,
+                    content: updateData.content,
+                    blogId: updateData.blogId,
+                }
+            })
 
-        if (!post) {
-            return false;
-        }
-
-        post.title = updateData.title
-        post.shortDescription = updateData.shortDescription
-        post.content = updateData.content
-        post.blogId = updateData.blogId
-
-        db.posts = db.posts.map(post => post.id === id ? {...post, ...updateData} : post)
-
-        return true
+        return result.modifiedCount >= 1;
     },
 
     async deletePost(id: string): Promise<boolean> {
-        const foundPost = db.posts.filter(post => post.id === id)
-
-        if (!foundPost.length) {
-            return false
-        } else {
-            db.posts = db.posts.filter(post => post.id !== id)
-            return true
-        }
+        const result = await postsDatabase.deleteOne({id: id})
+        return result.deletedCount >= 1
     },
 
     async ifBlogIdExist(value: string): Promise<boolean> {
-        if (db.blogs.some(blog => (blog.id === value))){
+
+        const blogs = await blogsDatabase.find({}).toArray();
+        if (blogs.some(blog => (blog.id === value))) {
             return Promise.resolve(true)
-        }else {
+        } else {
             return Promise.reject(false)
         }
     }

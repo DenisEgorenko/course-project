@@ -6,6 +6,8 @@ import {blogsRouter} from './routes/blogs-router';
 import {postsRouter} from './routes/posts-router';
 import {runDb} from './database/db';
 import {videosDatabase} from './repositories/videos-repositories';
+import {postsDatabase} from './repositories/posts-repositories';
+import {blogsDatabase} from './repositories/blogs-repositories';
 
 const express = require('express')
 export const app = express()
@@ -23,8 +25,8 @@ app.use('/posts', postsRouter)
 
 app.delete('/testing/all-data', async (req: Request, res: Response) => {
     await videosDatabase.deleteMany({})
-    db.posts = []
-    db.blogs = []
+    await postsDatabase.deleteMany({})
+    await blogsDatabase.deleteMany({})
     res.sendStatus(httpStatus.NO_CONTENT_204)
 })
 

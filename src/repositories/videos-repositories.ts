@@ -1,6 +1,6 @@
 import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {db, videoType} from './dataBase';
+import {videoType} from './dataBase';
 import {dataBase} from '../database/db';
 
 
@@ -54,10 +54,7 @@ export const videosRepositories = {
 
     async deleteVideo(id: number) {
         const result = await videosDatabase.deleteOne({id: id})
-        console.log(result.deletedCount)
-
         return result.deletedCount >= 1
-
     }
 
 }

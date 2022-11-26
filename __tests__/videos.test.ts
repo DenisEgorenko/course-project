@@ -5,6 +5,9 @@ import {httpStatus} from '../src/types/responseTypes';
 import {UpdateVideoInputModel} from '../src/models/videos-models/UpdateVideoInputModel';
 import {db, videoType} from '../src/repositories/dataBase';
 import {resolutions} from '../src/models/videos-models/resolutionsModel';
+import {postsDatabase} from '../src/repositories/posts-repositories';
+import {videosDatabase} from '../src/repositories/videos-repositories';
+import {blogsDatabase} from '../src/repositories/blogs-repositories';
 
 describe('Video CRUD tests', function () {
 
@@ -12,8 +15,8 @@ describe('Video CRUD tests', function () {
         await request(app).delete('/testing/all-data').expect(httpStatus.NO_CONTENT_204)
     })
 
-    it('DB should empty', function () {
-        expect(db.videos).toEqual([])
+    it('DB should empty', async function () {
+        expect(await videosDatabase.find({}).toArray()).toEqual([])
     });
 
     // Create
@@ -328,6 +331,9 @@ describe('Video CRUD tests', function () {
         await request(app)
             .delete(`/videos/${createdVideo1.id}`)
             .expect(httpStatus.NO_CONTENT_204)
+
+        const res = await videosDatabase.find({}).toArray()
+        expect(res.length).toBe(1)
     });
 
     it('should not delete Video if wrong id', async function () {

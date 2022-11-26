@@ -6,6 +6,8 @@ import {CreateBlogInputModel} from '../src/models/blogs-models/CreateBlogInputMo
 import {UpdateBlogInputModel} from '../src/models/blogs-models/UpdateBlogInputModel';
 import {CreatePostInputModel} from '../src/models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../src/models/posts-models/UpdatePostInputModel';
+import {blogsDatabase} from '../src/repositories/blogs-repositories';
+import {postsDatabase} from '../src/repositories/posts-repositories';
 
 
 const authToken = 'YWRtaW46cXdlcnR5'
@@ -16,8 +18,8 @@ describe('Posts CRUD tests', function () {
         await request(app).delete('/testing/all-data').expect(httpStatus.NO_CONTENT_204)
     })
 
-    it('DB should empty', function () {
-        expect(db.posts).toEqual([])
+    it('DB should empty', async function () {
+        expect(await postsDatabase.find({}).toArray()).toEqual([])
     });
 
     // Create
@@ -30,7 +32,7 @@ describe('Posts CRUD tests', function () {
     it('should add post to DB', async function () {
 
         const newBlog: CreateBlogInputModel = {
-            name: 'Имя блога 1',
+            name: 'Блог для постов',
             description: 'Описание 1',
             websiteUrl: 'https://www.example.com'
         }
@@ -72,11 +74,13 @@ describe('Posts CRUD tests', function () {
         expect(response.body).toEqual(
             {
                 id: expect.any(String),
+                _id: expect.any(String),
                 title: 'Заголовок поста',
                 shortDescription: 'Короткое описание',
                 content: 'Контент',
                 blogId: blog.id,
-                blogName: ''
+                blogName: '',
+                createdAt: expect.any(String)
             }
         )
         createdPost1 = response.body
@@ -211,7 +215,7 @@ describe('Posts CRUD tests', function () {
 
     //Update
 
-    it('blog should be updated', async function () {
+    it('post should be updated', async function () {
         const dataForUpdate: UpdatePostInputModel = {
             title: 'Заголовок поста обновленный',
             shortDescription: 'описание обновленное',
@@ -350,7 +354,9 @@ describe('Posts CRUD tests', function () {
             .set('Authorization', `Basic ${authToken}`)
             .expect(httpStatus.NO_CONTENT_204)
 
-        expect(db.posts.length).toBe(1)
+        const res = await postsDatabase.find({}).toArray()
+
+        expect(res.length).toBe(1)
     });
 
     it('should not delete Video if wrong id', async function () {
