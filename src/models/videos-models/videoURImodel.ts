@@ -1,3 +1,3 @@
 export type videoURImodel = {
-    id: number
+    id: string
 }

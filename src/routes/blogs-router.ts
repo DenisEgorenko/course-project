@@ -1,9 +1,6 @@
 import {Request, Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from '../types/requestTypes';
-import {videoURImodel} from '../models/videos-models/videoURImodel';
-import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videosRepositories} from '../repositories/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {blogType} from '../repositories/dataBase';
@@ -34,14 +31,14 @@ const UrlValidation = body('websiteUrl').isLength({
 
 
 // Read
-blogsRouter.get('/', (req: Request, res: Response<Array<blogType>>) => {
+blogsRouter.get('/', async (req: Request, res: Response<blogType[]>) => {
     res.status(httpStatus.OK_200)
-    res.json(blogsRepositories.getAllBlogs())
+    res.json(await blogsRepositories.getAllBlogs())
 })
 
-blogsRouter.get('/:id', (req: RequestWithParams<blogsURImodel>, res: Response<blogType>) => {
+blogsRouter.get('/:id', async (req: RequestWithParams<blogsURImodel>, res: Response<blogType>) => {
 
-    const foundBlog = blogsRepositories.getBlogById(req.params.id)
+    const foundBlog = await blogsRepositories.getBlogById(req.params.id)
 
     if (!foundBlog) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -59,10 +56,10 @@ blogsRouter.post('/',
     blogDescriptionValidation,
     UrlValidation,
     inputValidationMiddleware,
-    (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
+    async (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
 
         res.status(httpStatus.CREATED_201)
-        res.json(blogsRepositories.createNewBlog(req.body))
+        res.json(await blogsRepositories.createNewBlog(req.body))
     })
 
 // Update Videos
@@ -72,14 +69,14 @@ blogsRouter.put('/:id',
     blogDescriptionValidation,
     UrlValidation,
     inputValidationMiddleware,
-    (req: RequestWithParamsAndBody<blogsURImodel, UpdateBlogInputModel>, res: Response<ErrorType>) => {
+    async (req: RequestWithParamsAndBody<blogsURImodel, UpdateBlogInputModel>, res: Response<ErrorType>) => {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return;
         }
 
-        if (!blogsRepositories.updateBlog(req.params.id, req.body)) {
+        if (!await blogsRepositories.updateBlog(req.params.id, req.body)) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
             return;
         } else {
@@ -91,14 +88,14 @@ blogsRouter.put('/:id',
 blogsRouter.delete('/:id',
     authorisationMiddleware,
     inputValidationMiddleware,
-    (req: RequestWithParams<blogsURImodel>, res: Response) => {
+    async (req: RequestWithParams<blogsURImodel>, res: Response) => {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return;
         }
 
-        const deleteVideo = blogsRepositories.deleteBlog(req.params.id)
+        const deleteVideo = await blogsRepositories.deleteBlog(req.params.id)
 
         if (!deleteVideo) {
             res.sendStatus(httpStatus.NOT_FOUND_404)

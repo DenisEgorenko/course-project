@@ -4,16 +4,16 @@ import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel'
 
 
 export const postsRepositories = {
-    getAllPosts() {
+    async getAllPosts() {
         return db.posts
     },
 
-    getPostById(id: string) {
+    async getPostById(id: string) {
         const foundPost = db.posts.filter(post => post.id === id)
         return foundPost[0]
     },
 
-    createNewPost(requestData: CreatePostInputModel) {
+    async createNewPost(requestData: CreatePostInputModel) {
 
         const newPost: postType = {
             id: (+(new Date())).toString(),
@@ -29,7 +29,7 @@ export const postsRepositories = {
         return newPost
     },
 
-    updatePost(id: string, updateData: UpdatePostInputModel) {
+    async updatePost(id: string, updateData: UpdatePostInputModel) {
 
         const post = db.posts.find(post => post.id === id)
 
@@ -47,7 +47,7 @@ export const postsRepositories = {
         return true
     },
 
-    deletePost(id: string) {
+    async deletePost(id: string): Promise<boolean> {
         const foundPost = db.posts.filter(post => post.id === id)
 
         if (!foundPost.length) {
@@ -58,7 +58,11 @@ export const postsRepositories = {
         }
     },
 
-    ifBlogIdExist(value: string) {
-        return db.blogs.some(blog => (blog.id === value));
+    async ifBlogIdExist(value: string): Promise<boolean> {
+        if (db.blogs.some(blog => (blog.id === value))){
+            return Promise.resolve(true)
+        }else {
+            return Promise.reject(false)
+        }
     }
 }

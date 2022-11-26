@@ -1,21 +1,19 @@
-import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
-import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {blogType, db, videoType} from './dataBase';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
+import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
+import {blogType, db} from './dataBase';
 
 
 export const blogsRepositories = {
-    getAllBlogs() {
-        return db.blogs
+    async getAllBlogs() {
+        return db.blogs;
     },
 
-    getBlogById(id: string) {
+    async getBlogById(id: string) {
         const foundBlog = db.blogs.filter(blog => blog.id === id)
         return foundBlog[0]
     },
 
-    createNewBlog(requestData: CreateBlogInputModel) {
+    async createNewBlog(requestData: CreateBlogInputModel) {
 
         const newBlog: blogType = {
             id: (+(new Date())).toString(),
@@ -29,7 +27,7 @@ export const blogsRepositories = {
         return newBlog
     },
 
-    updateBlog(id: string, updateData: UpdateBlogInputModel) {
+    async updateBlog(id: string, updateData: UpdateBlogInputModel) {
 
         const blog = db.blogs.find(blog => blog.id === id)
 
@@ -46,7 +44,7 @@ export const blogsRepositories = {
         return true
     },
 
-    deleteBlog(id: string) {
+    async deleteBlog(id: string) {
         const foundBlog = db.blogs.filter(blog => blog.id === id)
 
         if (!foundBlog.length) {

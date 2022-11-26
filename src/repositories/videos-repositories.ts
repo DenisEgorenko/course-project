@@ -1,19 +1,22 @@
 import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
 import {db, videoType} from './dataBase';
+import {dataBase} from '../database/db';
 
+
+export const videosDatabase = dataBase.collection<videoType>('videos')
 
 export const videosRepositories = {
-    getAllVideos() {
-        return db.videos
+    async getAllVideos() {
+        return videosDatabase.find({}).toArray();
     },
 
-    getVideoById(id: number) {
-        const foundVideos = db.videos.filter(video => video.id === id)
+    async getVideoById(id: number) {
+        const foundVideos = await videosDatabase.find({id: id}).toArray()
         return foundVideos[0]
     },
 
-    createNewVideo(requestData: createVideoInputModel) {
+    async createNewVideo(requestData: createVideoInputModel) {
         const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
 
         const newVideo: videoType = {
@@ -27,51 +30,34 @@ export const videosRepositories = {
             availableResolutions: requestData.availableResolutions
         }
 
-        db.videos.push(newVideo)
+        await videosDatabase.insertOne(newVideo)
 
         return newVideo
     },
 
-    updateVideo(id: number, updateData: UpdateVideoInputModel) {
-        const video = db.videos.find(video => video.id === +id)
+    async updateVideo(id: number, updateData: UpdateVideoInputModel) {
 
-        if (!video) {
-            return false;
-        }
-
-        video.title = updateData.title
-        video.author = updateData.author
-
-        if (updateData.canBeDownloaded) {
-            video.canBeDownloaded = updateData.canBeDownloaded
-        }
-
-        if (updateData.minAgeRestriction) {
-            video.minAgeRestriction = updateData.minAgeRestriction
-        }
-
-        if (updateData.publicationDate) {
-            video.publicationDate = updateData.publicationDate
-        }
-
-        if (updateData.availableResolutions) {
-            video.availableResolutions = updateData.availableResolutions
-        }
-
-        db.videos = db.videos.map(video => video.id === id ? {...video, ...updateData} : video)
-
-        return true
+        const result = await videosDatabase.updateOne(
+            {id: id},
+            {
+                $set: {
+                    title: updateData.title,
+                    author: updateData.author,
+                    canBeDownloaded: updateData.canBeDownloaded,
+                    minAgeRestriction: updateData.minAgeRestriction,
+                    publicationDate: updateData.publicationDate,
+                    availableResolutions: updateData.availableResolutions
+                }
+            })
+        return result.modifiedCount >= 1;
     },
 
-    deleteVideo(id: number) {
-        const foundVideo = db.videos.filter(video => video.id === +id)
+    async deleteVideo(id: number) {
+        const result = await videosDatabase.deleteOne({id: id})
+        console.log(result.deletedCount)
 
-        if (!foundVideo.length) {
-            return false
-        } else {
-            db.videos = db.videos.filter(video => video.id !== +id)
-            return true
-        }
+        return result.deletedCount >= 1
+
     }
 
 }

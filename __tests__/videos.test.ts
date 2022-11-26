@@ -47,6 +47,7 @@ describe('Video CRUD tests', function () {
 
         expect(response.body).toEqual(
             {
+                _id: expect.any(String),
                 id: expect.any(Number),
                 title: newVideo.title,
                 author: newVideo.author,
@@ -327,8 +328,6 @@ describe('Video CRUD tests', function () {
         await request(app)
             .delete(`/videos/${createdVideo1.id}`)
             .expect(httpStatus.NO_CONTENT_204)
-
-        expect(db.videos.length).toBe(1)
     });
 
     it('should not delete Video if wrong id', async function () {

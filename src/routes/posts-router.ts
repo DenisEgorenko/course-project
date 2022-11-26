@@ -34,20 +34,20 @@ const blogIdValidation = body('blogId')
     .isLength({
         min: 1
     })
-    .custom(value => {
-        return postsRepositories.ifBlogIdExist(value)
+    .custom( async value => {
+        return await postsRepositories.ifBlogIdExist(value)
     })
     .withMessage('Request should consist content with length more than 1')
 
 // Read
-postsRouter.get('/', (req: Request, res: Response<Array<postType>>) => {
+postsRouter.get('/', async (req: Request, res: Response<Array<postType>>) => {
     res.status(httpStatus.OK_200)
-    res.json(postsRepositories.getAllPosts())
+    res.json(await postsRepositories.getAllPosts())
 })
 
-postsRouter.get('/:id', (req: RequestWithParams<postsURImodel>, res: Response<postType>) => {
+postsRouter.get('/:id', async (req: RequestWithParams<postsURImodel>, res: Response<postType>) => {
 
-    const foundPost = postsRepositories.getPostById(req.params.id)
+    const foundPost = await postsRepositories.getPostById(req.params.id)
 
     if (!foundPost) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -66,10 +66,10 @@ postsRouter.post('/',
     contentValidation,
     blogIdValidation,
     inputValidationMiddleware,
-    (req: RequestWithBody<CreatePostInputModel>, res: Response<ErrorType | postType>) => {
+    async (req: RequestWithBody<CreatePostInputModel>, res: Response<ErrorType | postType>) => {
 
         res.status(httpStatus.CREATED_201)
-        res.json(postsRepositories.createNewPost(req.body))
+        res.json(await postsRepositories.createNewPost(req.body))
     })
 
 // Update Videos
@@ -80,14 +80,14 @@ postsRouter.put('/:id',
     contentValidation,
     blogIdValidation,
     inputValidationMiddleware,
-    (req: RequestWithParamsAndBody<postsURImodel, UpdatePostInputModel>, res: Response<ErrorType>) => {
+    async (req: RequestWithParamsAndBody<postsURImodel, UpdatePostInputModel>, res: Response<ErrorType>) => {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return;
         }
 
-        if (!postsRepositories.updatePost(req.params.id, req.body)) {
+        if (!await postsRepositories.updatePost(req.params.id, req.body)) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
             return;
         } else {
@@ -99,14 +99,14 @@ postsRouter.put('/:id',
 postsRouter.delete('/:id',
     authorisationMiddleware,
     inputValidationMiddleware,
-    (req: RequestWithParams<postsURImodel>, res: Response) => {
+    async (req: RequestWithParams<postsURImodel>, res: Response) => {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return;
         }
 
-        const deleteVideo = postsRepositories.deletePost(req.params.id)
+        const deleteVideo = await postsRepositories.deletePost(req.params.id)
 
         if (!deleteVideo) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
