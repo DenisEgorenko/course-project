@@ -34,7 +34,7 @@ const blogIdValidation = body('blogId')
     .isLength({
         min: 1
     })
-    .custom( async value => {
+    .custom(async value => {
         return await postsRepositories.ifBlogIdExist(value)
     })
     .withMessage('Request should consist content with length more than 1')
@@ -68,8 +68,11 @@ postsRouter.post('/',
     inputValidationMiddleware,
     async (req: RequestWithBody<CreatePostInputModel>, res: Response<ErrorType | postType>) => {
 
+
+        const action = await postsRepositories.createNewPost(req.body)
+
         res.status(httpStatus.CREATED_201)
-        res.json(await postsRepositories.createNewPost(req.body))
+        res.json(action)
     })
 
 // Update Videos

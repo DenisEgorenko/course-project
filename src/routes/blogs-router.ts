@@ -58,8 +58,10 @@ blogsRouter.post('/',
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
 
+        const action = await blogsRepositories.createNewBlog(req.body)
+
         res.status(httpStatus.CREATED_201)
-        res.json(await blogsRepositories.createNewBlog(req.body))
+        res.json(action)
     })
 
 // Update Videos
