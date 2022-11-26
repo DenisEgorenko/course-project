@@ -9,11 +9,11 @@ export const blogsDatabase = dataBase.collection<blogType>('blogs')
 
 export const blogsRepositories = {
     async getAllBlogs() {
-        return blogsDatabase.find({}).toArray();
+        return blogsDatabase.find({},{projection:{ _id: 0 }}).toArray();
     },
 
     async getBlogById(id: string) {
-        const foundBlog = await blogsDatabase.find({id: id}).toArray()
+        const foundBlog = await blogsDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
         return foundBlog[0]
     },
 
@@ -27,11 +27,9 @@ export const blogsRepositories = {
             createdAt: new Date()
         }
 
-        const copyBlog = {...newBlog}
+        await blogsDatabase.insertOne({...newBlog})
 
-        await blogsDatabase.insertOne(newBlog)
-
-        return copyBlog
+        return newBlog
     },
 
     async updateBlog(id: string, updateData: UpdateBlogInputModel) {

@@ -8,11 +8,11 @@ export const videosDatabase = dataBase.collection<videoType>('videos')
 
 export const videosRepositories = {
     async getAllVideos() {
-        return videosDatabase.find({}).toArray();
+        return videosDatabase.find({}, {projection:{ _id: 0 }}).toArray();
     },
 
     async getVideoById(id: number) {
-        const foundVideos = await videosDatabase.find({id: id}).toArray()
+        const foundVideos = await videosDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
         return foundVideos[0]
     },
 
@@ -30,11 +30,9 @@ export const videosRepositories = {
             availableResolutions: requestData.availableResolutions
         }
 
-        const copyVideo = {...newVideo}
+        await videosDatabase.insertOne({...newVideo})
 
-        await videosDatabase.insertOne(newVideo)
-
-        return copyVideo
+        return newVideo
     },
 
     async updateVideo(id: number, updateData: UpdateVideoInputModel) {

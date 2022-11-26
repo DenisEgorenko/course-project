@@ -10,11 +10,11 @@ export const postsDatabase = dataBase.collection<postType>('posts')
 
 export const postsRepositories = {
     async getAllPosts() {
-        return postsDatabase.find({}).toArray();
+        return postsDatabase.find({}, {projection:{ _id: 0 }}).toArray();
     },
 
     async getPostById(id: string) {
-        const foundPost = await postsDatabase.find({id: id}).toArray()
+        const foundPost = await postsDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
         return foundPost[0]
     },
 
@@ -30,11 +30,9 @@ export const postsRepositories = {
             createdAt: new Date()
         }
 
-        const copyPost = {...newPost}
+        await postsDatabase.insertOne({...newPost})
 
-        await postsDatabase.insertOne(newPost)
-
-        return copyPost
+        return newPost
     },
 
     async updatePost(id: string, updateData: UpdatePostInputModel) {
