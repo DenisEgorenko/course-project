@@ -30,9 +30,11 @@ export const videosRepositories = {
             availableResolutions: requestData.availableResolutions
         }
 
+        const copyVideo = {...newVideo}
+
         await videosDatabase.insertOne(newVideo)
 
-        return newVideo
+        return copyVideo
     },
 
     async updateVideo(id: number, updateData: UpdateVideoInputModel) {

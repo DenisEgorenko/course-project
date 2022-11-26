@@ -27,14 +27,15 @@ export const blogsRepositories = {
             createdAt: new Date()
         }
 
+        const copyBlog = {...newBlog}
+
         await blogsDatabase.insertOne(newBlog)
 
-        return newBlog
+        return copyBlog
     },
 
     async updateBlog(id: string, updateData: UpdateBlogInputModel) {
 
-        console.log(id, typeof id)
 
         const result = await blogsDatabase.updateOne(
             {id: id},

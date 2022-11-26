@@ -30,9 +30,11 @@ export const postsRepositories = {
             createdAt: new Date()
         }
 
+        const copyPost = {...newPost}
+
         await postsDatabase.insertOne(newPost)
 
-        return newPost
+        return copyPost
     },
 
     async updatePost(id: string, updateData: UpdatePostInputModel) {

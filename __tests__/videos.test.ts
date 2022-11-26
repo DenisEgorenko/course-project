@@ -50,7 +50,6 @@ describe('Video CRUD tests', function () {
 
         expect(response.body).toEqual(
             {
-                _id: expect.any(String),
                 id: expect.any(Number),
                 title: newVideo.title,
                 author: newVideo.author,

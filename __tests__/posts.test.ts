@@ -74,7 +74,6 @@ describe('Posts CRUD tests', function () {
         expect(response.body).toEqual(
             {
                 id: expect.any(String),
-                _id: expect.any(String),
                 title: 'Заголовок поста',
                 shortDescription: 'Короткое описание',
                 content: 'Контент',

@@ -55,7 +55,6 @@ describe('Blogs CRUD tests', function () {
 
         expect(response.body).toEqual(
             {
-                _id: expect.any(String),
                 id: expect.any(String),
                 name: newBlog.name,
                 description: newBlog.description,
@@ -144,9 +143,6 @@ describe('Blogs CRUD tests', function () {
         const allBlogs = await request(app)
             .get('/blogs')
             .expect(httpStatus.OK_200)
-
-
-        console.log(allBlogs.body)
 
         expect(allBlogs.body.length).toBe(2)
         expect(allBlogs.body[0].name).toBe(createdBlog1.name)
