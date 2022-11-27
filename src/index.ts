@@ -40,6 +40,6 @@ const startApp = async () => {
 }
 
 
-startApp().then().catch()
+startApp()
 
 

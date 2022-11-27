@@ -17,8 +17,8 @@ export const authorisationMiddleware = (req: Request, res: Response, next: NextF
 
 
     if (login && password && login === auth.login && password === auth.password) {
-        return next()
+        next()
+    } else {
+        res.status(401).send('Authentication required.')
     }
-
-    res.status(401).send('Authentication required.')
 }
