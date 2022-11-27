@@ -61,8 +61,10 @@ blogsRouter.post('/',
         await blogsRepositories.createNewBlog(req.body).then(action => {
             res.status(httpStatus.CREATED_201)
             res.json(action)
+            return;
         }).catch(e => {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
         })
 
 
