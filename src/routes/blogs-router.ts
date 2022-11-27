@@ -13,21 +13,30 @@ import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel'
 export const blogsRouter = Router({})
 
 
-const blogNameValidation = body('name').trim().isLength({
-    min: 1,
-    max: 15
-}).withMessage('Request should consist title with length less than 15')
+const blogNameValidation = body('name')
+    .trim()
+    .isLength({
+        min: 1,
+        max: 15
+    })
+    .withMessage('Request should consist title with length less than 15')
 
 
-const blogDescriptionValidation = body('description').trim().isLength({
-    min: 1,
-    max: 500
-}).withMessage('Request should consist description with length less than 500')
+const blogDescriptionValidation = body('description')
+    .trim()
+    .isLength({
+        min: 1,
+        max: 500
+    })
+    .withMessage('Request should consist description with length less than 500')
 
-const UrlValidation = body('websiteUrl').isLength({
-    min: 1,
-    max: 100
-}).matches(`^https://([a-zA-Z0-9_-]+\\.)+[a-zA-Z0-9_-]+(\\/[a-zA-Z0-9_-]+)*\\/?$`).withMessage('Request should consist websiteUrl')
+const UrlValidation = body('websiteUrl')
+    .isLength({
+        min: 1,
+        max: 100
+    })
+    .matches(`^https://([a-zA-Z0-9_-]+\\.)+[a-zA-Z0-9_-]+(\\/[a-zA-Z0-9_-]+)*\\/?$`)
+    .withMessage('Request should consist websiteUrl')
 
 
 // Read
@@ -58,16 +67,10 @@ blogsRouter.post('/',
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
 
-        await blogsRepositories.createNewBlog(req.body).then(action => {
-            res.status(httpStatus.CREATED_201)
-            res.json(action)
-            return;
-        }).catch(e => {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return;
-        })
+        const action = await blogsRepositories.createNewBlog(req.body)
 
-
+        res.status(httpStatus.CREATED_201)
+        res.json(action)
     })
 
 // Update Videos
@@ -89,6 +92,7 @@ blogsRouter.put('/:id',
             return;
         } else {
             res.sendStatus(httpStatus.NO_CONTENT_204)
+            return;
         }
     })
 
@@ -110,6 +114,7 @@ blogsRouter.delete('/:id',
             return
         } else {
             res.sendStatus(httpStatus.NO_CONTENT_204)
+            return;
         }
 
     })
