@@ -58,10 +58,14 @@ blogsRouter.post('/',
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogType>) => {
 
-        const action = await blogsRepositories.createNewBlog(req.body)
+        await blogsRepositories.createNewBlog(req.body).then(action => {
+            res.status(httpStatus.CREATED_201)
+            res.json(action)
+        }).catch(e => {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        })
 
-        res.status(httpStatus.CREATED_201)
-        res.json(action)
+
     })
 
 // Update Videos
