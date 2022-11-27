@@ -16,9 +16,11 @@ export const authorisationMiddleware = (req: Request, res: Response, next: NextF
     const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':')
 
 
-    if (login && password && login === auth.login && password === auth.password) {
-        next()
-    } else {
+    if (!login && password && login === auth.login && password === auth.password) {
         res.status(401).send('Authentication required.')
+        return
+    } else {
+        next()
     }
+
 }
