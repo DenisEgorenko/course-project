@@ -107,7 +107,7 @@ blogsRouter.post('/:id/posts',
         const blog = await blogsQueryRepositories.getBlogById(req.params.id)
 
         if (!blog) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            res.sendStatus(httpStatus.NOT_FOUND_404)
             return
         }
 
