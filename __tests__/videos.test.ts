@@ -3,11 +3,9 @@ import {app} from '../src';
 import {createVideoInputModel} from '../src/models/videos-models/CreateVideoInputModel';
 import {httpStatus} from '../src/types/responseTypes';
 import {UpdateVideoInputModel} from '../src/models/videos-models/UpdateVideoInputModel';
-import {db, videoType} from '../src/repositories/dataBase';
 import {resolutions} from '../src/models/videos-models/resolutionsModel';
-import {postsDatabase} from '../src/repositories/posts-repositories';
-import {videosDatabase} from '../src/repositories/videos-repositories';
-import {blogsDatabase} from '../src/repositories/blogs-repositories';
+import {videosDatabase, videoTypeDB} from '../src/database/dbInterface';
+
 
 describe('Video CRUD tests', function () {
 
@@ -21,8 +19,8 @@ describe('Video CRUD tests', function () {
 
     // Create
 
-    let createdVideo1: videoType
-    let createdVideo2: videoType
+    let createdVideo1: videoTypeDB
+    let createdVideo2: videoTypeDB
 
     it('should add video to DB', async function () {
 

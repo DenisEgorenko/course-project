@@ -1,6 +1,5 @@
 import {MongoClient} from 'mongodb';
 import * as dotenv from 'dotenv'
-import {app} from '../index';
 
 dotenv.config()
 
@@ -29,5 +28,6 @@ export const runDb = async () => {
     }
 }
 
-
 export const dataBase = client.db()
+
+

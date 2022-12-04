@@ -1,13 +1,11 @@
 import {Request, Response} from 'express';
 import {httpStatus} from './types/responseTypes';
 import {videosRouter} from './routes/videos-router';
-import {db} from './repositories/dataBase';
 import {blogsRouter} from './routes/blogs-router';
 import {postsRouter} from './routes/posts-router';
 import {runDb} from './database/db';
-import {videosDatabase} from './repositories/videos-repositories';
-import {postsDatabase} from './repositories/posts-repositories';
-import {blogsDatabase} from './repositories/blogs-repositories';
+import {blogsDatabase, postsDatabase, videosDatabase} from './database/dbInterface';
+
 
 const express = require('express')
 export const app = express()

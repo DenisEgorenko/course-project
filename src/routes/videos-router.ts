@@ -7,8 +7,9 @@ import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputMod
 import {videosRepositories} from '../repositories/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
-import {videoType} from '../repositories/dataBase';
 import {resolutions} from '../models/videos-models/resolutionsModel';
+import {videosQueryRepositories} from '../repositories/videos-query-repositories';
+import {videoTypeDB} from '../database/dbInterface';
 
 export const videosRouter = Router({})
 
@@ -45,14 +46,14 @@ const publicationDateValidation = body('publicationDate').optional().isString().
 
 
 
-videosRouter.get('/', async (req: Request, res: Response<Array<videoType>>) => {
+videosRouter.get('/', async (req: Request, res: Response<Array<videoTypeDB>>) => {
     res.status(httpStatus.OK_200)
-    res.json(await videosRepositories.getAllVideos())
+    res.json(await videosQueryRepositories.getAllVideos())
 })
 
-videosRouter.get('/:id', async (req: RequestWithParams<videoURImodel>, res: Response<videoType>) => {
+videosRouter.get('/:id', async (req: RequestWithParams<videoURImodel>, res: Response<videoTypeDB>) => {
 
-    const foundVideos = await videosRepositories.getVideoById(+req.params.id)
+    const foundVideos = await videosQueryRepositories.getVideoById(+req.params.id)
 
     if (!foundVideos) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -69,7 +70,7 @@ videosRouter.post('/',
     authorValidation,
     availableResolutionsValidationRequired,
     inputValidationMiddleware,
-    async (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoType>) => {
+    async (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoTypeDB>) => {
 
         res.status(httpStatus.CREATED_201)
         res.json(await videosRepositories.createNewVideo(req.body))

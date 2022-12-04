@@ -1,68 +1,32 @@
-import {postType} from './dataBase';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
-import {dataBase} from '../database/db';
-import {blogsDatabase} from './blogs-repositories';
-
-
-export const postsDatabase = dataBase.collection<postType>('posts')
+import {blogsDatabase, postsDatabase, postTypeDB} from '../database/dbInterface';
+import {PostFilterQuery, updatePostQuery} from '../domain/posts-service';
 
 
 export const postsRepositories = {
-    async getAllPosts() {
-        return postsDatabase.find({}, {projection:{ _id: 0 }}).toArray();
-    },
 
-    async getPostById(id: string) {
-        const foundPost = await postsDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
-        return foundPost[0]
-    },
-
-    async createNewPost(requestData: CreatePostInputModel) {
-
-        const newPost: postType = {
-            id: (+(new Date())).toString(),
-            title: requestData.title,
-            shortDescription: requestData.shortDescription,
-            content: requestData.content,
-            blogId: requestData.blogId,
-            blogName: '',
-            createdAt: new Date()
+    async createNewPost(newPost: postTypeDB) {
+        try {
+            await postsDatabase.insertOne({...newPost})
+            return true
+        } catch (e) {
+            return false
         }
-
-        await postsDatabase.insertOne({...newPost})
-
-        return newPost
     },
 
-    async updatePost(id: string, updateData: UpdatePostInputModel) {
-
+    async updatePost(filterQuery: PostFilterQuery, updateQuery: updatePostQuery) {
         const result = await postsDatabase.updateOne(
-            {id: id},
-            {
-                $set: {
-                    title: updateData.title,
-                    shortDescription: updateData.shortDescription,
-                    content: updateData.content,
-                    blogId: updateData.blogId,
-                }
-            })
-
+            filterQuery,
+            updateQuery
+        )
         return result.modifiedCount >= 1;
     },
 
-    async deletePost(id: string): Promise<boolean> {
-        const result = await postsDatabase.deleteOne({id: id})
+    async deletePost(filterQuery: PostFilterQuery): Promise<boolean> {
+        const result = await postsDatabase.deleteOne(filterQuery)
         return result.deletedCount >= 1
     },
 
-    async ifBlogIdExist(value: string): Promise<boolean> {
 
-        const blogs = await blogsDatabase.find({}).toArray();
-        if (blogs.some(blog => (blog.id === value))) {
-            return Promise.resolve(true)
-        } else {
-            return Promise.reject(false)
-        }
-    }
 }

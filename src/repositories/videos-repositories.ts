@@ -1,25 +1,14 @@
 import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videoType} from './dataBase';
-import {dataBase} from '../database/db';
+import {videosDatabase, videoTypeDB} from '../database/dbInterface';
 
-
-export const videosDatabase = dataBase.collection<videoType>('videos')
 
 export const videosRepositories = {
-    async getAllVideos() {
-        return videosDatabase.find({}, {projection:{ _id: 0 }}).toArray();
-    },
-
-    async getVideoById(id: number) {
-        const foundVideos = await videosDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
-        return foundVideos[0]
-    },
 
     async createNewVideo(requestData: createVideoInputModel) {
         const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
 
-        const newVideo: videoType = {
+        const newVideo: videoTypeDB = {
             id: +(new Date()),
             title: requestData.title,
             author: requestData.author,

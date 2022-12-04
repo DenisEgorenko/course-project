@@ -1,13 +1,9 @@
 import request from 'supertest'
 import {app} from '../src';
-import {createVideoInputModel} from '../src/models/videos-models/CreateVideoInputModel';
 import {httpStatus} from '../src/types/responseTypes';
-import {UpdateVideoInputModel} from '../src/models/videos-models/UpdateVideoInputModel';
-import {blogType, db} from '../src/repositories/dataBase';
-import {resolutions} from '../src/models/videos-models/resolutionsModel';
 import {CreateBlogInputModel} from '../src/models/blogs-models/CreateBlogInputModel';
 import {UpdateBlogInputModel} from '../src/models/blogs-models/UpdateBlogInputModel';
-import {blogsDatabase} from '../src/repositories/blogs-repositories';
+import {blogsDatabase, blogTypeDB} from '../src/database/dbInterface';
 
 
 const authToken = 'YWRtaW46cXdlcnR5'
@@ -24,8 +20,8 @@ describe('Blogs CRUD tests', function () {
 
     // Create
 
-    let createdBlog1: blogType
-    let createdBlog2: blogType
+    let createdBlog1: blogTypeDB
+    let createdBlog2: blogTypeDB
 
     it('should add blogs to DB', async function () {
 
@@ -141,12 +137,12 @@ describe('Blogs CRUD tests', function () {
 
     it('should return all blogs', async function () {
         const allBlogs = await request(app)
-            .get('/blogs')
+            .get('/blogs?sortDirection=asc')
             .expect(httpStatus.OK_200)
 
-        expect(allBlogs.body.length).toBe(2)
-        expect(allBlogs.body[0].name).toBe(createdBlog1.name)
-        expect(allBlogs.body[1].name).toBe(createdBlog2.name)
+        expect(allBlogs.body.items.length).toBe(2)
+        expect(allBlogs.body.items[0].name).toBe(createdBlog1.name)
+        expect(allBlogs.body.items[1].name).toBe(createdBlog2.name)
     });
 
     it('should return blog by id', async function () {

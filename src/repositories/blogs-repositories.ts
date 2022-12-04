@@ -1,55 +1,32 @@
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogType} from './dataBase';
-import {dataBase} from '../database/db';
-
-
-export const blogsDatabase = dataBase.collection<blogType>('blogs')
+import {blogsDatabase, blogTypeDB} from '../database/dbInterface';
+import {BlogFilterQuery, updateBlogQuery} from '../domain/blogs-service';
 
 
 export const blogsRepositories = {
-    async getAllBlogs() {
-        return blogsDatabase.find({},{projection:{ _id: 0 }}).toArray();
-    },
 
-    async getBlogById(id: string) {
-        const foundBlog = await blogsDatabase.find({id: id}, {projection:{ _id: 0 }}).toArray()
-        return foundBlog[0]
-    },
+    async createNewBlog(newBlog: blogTypeDB) {
 
-    async createNewBlog(requestData: CreateBlogInputModel) {
-
-        const newBlog: blogType = {
-            id: (+(new Date())).toString(),
-            name: requestData.name,
-            description: requestData.description,
-            websiteUrl: requestData.websiteUrl,
-            createdAt: new Date()
+        try {
+            await blogsDatabase.insertOne({...newBlog})
+            return true
+        } catch (e) {
+            return false
         }
-
-        await blogsDatabase.insertOne({...newBlog})
-
-        return newBlog
     },
 
-    async updateBlog(id: string, updateData: UpdateBlogInputModel) {
-
-
+    async updateBlog(filterQuery: BlogFilterQuery, updateQuery: updateBlogQuery): Promise<boolean> {
         const result = await blogsDatabase.updateOne(
-            {id: id},
-            {
-                $set: {
-                    name: updateData.name,
-                    description: updateData.description,
-                    websiteUrl: updateData.websiteUrl,
-                }
-            })
+            filterQuery,
+            updateQuery
+        )
 
         return result.modifiedCount >= 1;
     },
 
-    async deleteBlog(id: string) {
-        const result = await blogsDatabase.deleteOne({id: id})
+    async deleteBlog(filter: BlogFilterQuery) {
+        const result = await blogsDatabase.deleteOne(filter)
         return result.deletedCount >= 1
     }
 
