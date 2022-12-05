@@ -9,7 +9,7 @@ export const blogsQueryRepositories = {
 
     async getAllBlogs(query: blogsQueryModel) {
 
-        const filter = query.searchNameTerm ? {name: new RegExp(query.searchNameTerm)} : {}
+        const filter = query.searchNameTerm ? {name: new RegExp(query.searchNameTerm, 'i')} : {}
 
         const sortBy = query.sortBy ? query.sortBy : 'createdAt'
         const sortDirection: Sort = query.sortDirection === 'asc' ? 1 : -1
