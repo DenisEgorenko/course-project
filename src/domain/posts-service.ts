@@ -29,7 +29,7 @@ export const postsService = {
             shortDescription: requestData.shortDescription,
             content: requestData.content,
             blogId: requestData.blogId,
-            blogName: '',
+            blogName: requestData.blogId,
             createdAt: new Date()
         }
         try {
