@@ -7,7 +7,7 @@ import {
     RequestWithParamsAndQuery,
     RequestWithQuery
 } from '../types/requestTypes';
-import {body} from 'express-validator';
+import {body, param} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {blogsRepositories} from '../repositories/blogs-repositories';
 import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
@@ -74,6 +74,14 @@ blogsRouter.get('/:id', async (req: RequestWithParams<blogsURImodel>, res: Respo
 })
 
 blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<blogsURImodel, postsQueryModel>, res: Response<postsOutputModel>) => {
+
+    const blog = await blogsQueryRepositories.getBlogById(req.params.id)
+
+    if (!blog) {
+        res.sendStatus(httpStatus.NOT_FOUND_404)
+        return
+    }
+
     res.status(httpStatus.OK_200)
     res.json(await blogsQueryRepositories.getAllBlogsPosts(req.params.id, req.query))
 })
