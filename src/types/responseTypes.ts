@@ -6,7 +6,7 @@ export enum httpStatus {
     NO_CONTENT_204 = 204,
     BAD_REQUEST_400 = 400,
     NOT_FOUND_404 = 404,
-    UNATHORIZED = 401,
+    UNATHORIZED_401 = 401,
 }
 
 

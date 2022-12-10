@@ -44,7 +44,7 @@ authRouter.post('/login',
             console.log(userData)
 
             if (!userData) {
-                res.sendStatus(httpStatus.BAD_REQUEST_400)
+                res.sendStatus(httpStatus.UNATHORIZED_401)
                 return
             }
 
@@ -53,10 +53,10 @@ authRouter.post('/login',
             if (result) {
                 res.sendStatus(httpStatus.NO_CONTENT_204)
             } else {
-                res.sendStatus(httpStatus.UNATHORIZED)
+                res.sendStatus(httpStatus.UNATHORIZED_401)
             }
 
         } catch (e) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            res.sendStatus(httpStatus.UNATHORIZED_401)
         }
     })
