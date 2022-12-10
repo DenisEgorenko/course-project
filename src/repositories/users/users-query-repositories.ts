@@ -13,14 +13,15 @@ import {usersQueryModel} from '../../models/users-models/usersQueryModel';
 export const usersQueryRepositories = {
     async getAllUsers(query: usersQueryModel) {
 
-        const filter: { email?: RegExp, login?: RegExp } = {}
+        const filter: { $or: [{ email?: RegExp }, { login?: RegExp }] } =
+            {$or: [{}, {}]}
 
         if (query.searchEmailTerm) {
-            filter.email = new RegExp(query.searchEmailTerm, 'i')
+            filter.$or[0].email = new RegExp(query.searchEmailTerm, 'i')
         }
 
         if (query.searchLoginTerm) {
-            filter.login = new RegExp(query.searchLoginTerm, 'i')
+            filter.$or[1].login = new RegExp(query.searchLoginTerm, 'i')
         }
 
 
