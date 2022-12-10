@@ -4,7 +4,7 @@ import {videosRouter} from './routes/videos-router';
 import {blogsRouter} from './routes/blogs-router';
 import {postsRouter} from './routes/posts-router';
 import {runDb} from './database/db';
-import {blogsDatabase, postsDatabase, videosDatabase} from './database/dbInterface';
+import {blogsDatabase, postsDatabase, usersDatabase, videosDatabase} from './database/dbInterface';
 import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
 
@@ -30,6 +30,8 @@ app.delete('/testing/all-data', async (req: Request, res: Response) => {
     await videosDatabase.deleteMany({})
     await postsDatabase.deleteMany({})
     await blogsDatabase.deleteMany({})
+    await usersDatabase.deleteMany({})
+
     res.sendStatus(httpStatus.NO_CONTENT_204)
 })
 
