@@ -5,6 +5,7 @@ import {resolutions} from '../models/videos-models/resolutionsModel';
 export const postsDatabase = dataBase.collection<postTypeDB>('posts')
 export const blogsDatabase = dataBase.collection<blogTypeDB>('blogs')
 export const videosDatabase = dataBase.collection<videoTypeDB>('videos')
+export const usersDatabase = dataBase.collection<userTypeDB>('users')
 
 
 export type blogTypeDB = {
@@ -22,6 +23,16 @@ export type postTypeDB = {
     content: string,
     blogId: string,
     blogName: string,
+    createdAt: Date
+}
+
+
+export type userTypeDB = {
+    id: string,
+    login: string,
+    email: string,
+    password: string,
+    salt: string,
     createdAt: Date
 }
 

@@ -4,11 +4,11 @@ import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from '../t
 import {videoURImodel} from '../models/videos-models/videoURImodel';
 import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videosRepositories} from '../repositories/videos-repositories';
+import {videosRepositories} from '../repositories/videos/videos-repositories';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {resolutions} from '../models/videos-models/resolutionsModel';
-import {videosQueryRepositories} from '../repositories/videos-query-repositories';
+import {videosQueryRepositories} from '../repositories/videos/videos-query-repositories';
 import {videoTypeDB} from '../database/dbInterface';
 
 export const videosRouter = Router({})

@@ -1,8 +1,8 @@
-import {blogsDatabase, blogTypeDB, postsDatabase} from '../database/dbInterface';
-import {blogsQueryModel} from '../models/blogs-models/blogsQueryModel';
+import {blogsDatabase, blogTypeDB, postsDatabase} from '../../database/dbInterface';
+import {blogsQueryModel} from '../../models/blogs-models/blogsQueryModel';
 import {Sort} from 'mongodb';
-import {postsQueryModel} from '../models/posts-models/postsQueryModel';
-import {postsToOutputModel} from './posts-query-repositories';
+import {postsQueryModel} from '../../models/posts-models/postsQueryModel';
+import {postsToOutputModel} from '../posts/posts-query-repositories';
 
 
 export const blogsQueryRepositories = {

@@ -1,6 +1,6 @@
-import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
-import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videosDatabase, videoTypeDB} from '../database/dbInterface';
+import {createVideoInputModel} from '../../models/videos-models/CreateVideoInputModel';
+import {UpdateVideoInputModel} from '../../models/videos-models/UpdateVideoInputModel';
+import {videosDatabase, videoTypeDB} from '../../database/dbInterface';
 
 
 export const videosRepositories = {

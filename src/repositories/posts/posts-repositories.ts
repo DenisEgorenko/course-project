@@ -1,7 +1,7 @@
-import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
-import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
-import {blogsDatabase, postsDatabase, postTypeDB} from '../database/dbInterface';
-import {PostFilterQuery, updatePostQuery} from '../domain/posts-service';
+import {CreatePostInputModel} from '../../models/posts-models/CreatePostInputModel';
+import {UpdatePostInputModel} from '../../models/posts-models/UpdatePostInputModel';
+import {blogsDatabase, postsDatabase, postTypeDB} from '../../database/dbInterface';
+import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
 
 
 export const postsRepositories = {

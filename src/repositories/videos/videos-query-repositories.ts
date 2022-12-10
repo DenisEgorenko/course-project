@@ -1,4 +1,4 @@
-import {videosDatabase} from '../database/dbInterface';
+import {videosDatabase} from '../../database/dbInterface';
 
 export const videosQueryRepositories = {
     async getAllVideos() {

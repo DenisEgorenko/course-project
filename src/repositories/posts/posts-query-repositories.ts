@@ -1,6 +1,6 @@
-import {blogsDatabase, blogTypeDB, postsDatabase, postTypeDB} from '../database/dbInterface';
+import {blogsDatabase, blogTypeDB, postsDatabase, postTypeDB} from '../../database/dbInterface';
 import {Sort} from 'mongodb';
-import {postsQueryModel} from '../models/posts-models/postsQueryModel';
+import {postsQueryModel} from '../../models/posts-models/postsQueryModel';
 
 
 export const postsQueryRepositories = {

@@ -1,6 +1,6 @@
 import {blogsDatabase, blogTypeDB} from '../database/dbInterface';
 import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsRepositories} from '../repositories/blogs-repositories';
+import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 
 

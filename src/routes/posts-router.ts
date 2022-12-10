@@ -4,15 +4,15 @@ import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWit
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {postsRepositories} from '../repositories/posts-repositories';
+import {postsRepositories} from '../repositories/posts/posts-repositories';
 import {postsURImodel} from '../models/posts-models/postsURImodel';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
-import {postsOutputModel, postsQueryRepositories} from '../repositories/posts-query-repositories';
+import {postsOutputModel, postsQueryRepositories} from '../repositories/posts/posts-query-repositories';
 import {postTypeDB} from '../database/dbInterface';
 import {postsService} from '../domain/posts-service';
 import {blogsService} from '../domain/blogs-service';
-import {blogsQueryRepositories} from '../repositories/blogs-query-repositories';
+import {blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
 import {postsQueryModel} from '../models/posts-models/postsQueryModel';
 
 export const postsRouter = Router({})

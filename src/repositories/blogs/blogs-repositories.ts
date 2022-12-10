@@ -1,7 +1,7 @@
-import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsDatabase, blogTypeDB} from '../database/dbInterface';
-import {BlogFilterQuery, updateBlogQuery} from '../domain/blogs-service';
+import {UpdateBlogInputModel} from '../../models/blogs-models/UpdateBlogInputModel';
+import {CreateBlogInputModel} from '../../models/blogs-models/CreateBlogInputModel';
+import {blogsDatabase, blogTypeDB} from '../../database/dbInterface';
+import {BlogFilterQuery, updateBlogQuery} from '../../domain/blogs-service';
 
 
 export const blogsRepositories = {

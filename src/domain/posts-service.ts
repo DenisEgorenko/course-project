@@ -1,7 +1,7 @@
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {postsDatabase, postTypeDB} from '../database/dbInterface';
-import {blogsRepositories} from '../repositories/blogs-repositories';
-import {postsRepositories} from '../repositories/posts-repositories';
+import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
+import {postsRepositories} from '../repositories/posts/posts-repositories';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 import {BlogFilterQuery, updateBlogQuery} from './blogs-service';
 
