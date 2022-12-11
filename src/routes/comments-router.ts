@@ -61,6 +61,7 @@ CommentsRouter.get('/:id', async (req: RequestWithParams<postsURImodel>, res: Re
 // Update Comment
 CommentsRouter.put('/:postId',
     bearerAuthorisationMiddleware,
+    commentContentValidation,
     inputValidationMiddleware,
     async (req: RequestWithParamsAndBody<commentsURImodel, UpdateCommentInputModel>, res: Response<ErrorType>) => {
 
