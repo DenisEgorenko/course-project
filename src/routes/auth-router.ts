@@ -7,12 +7,18 @@ import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel'
 import {blogsURImodel} from '../models/blogs-models/blogsURImodel';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {blogsOutputModel, blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
-import {blogTypeDB} from '../database/dbInterface';
+import {blogTypeDB, userTypeDB} from '../database/dbInterface';
 import {blogsService} from '../domain/blogs-service';
 import {blogsQueryModel} from '../models/blogs-models/blogsQueryModel';
-import {authInputModel} from '../models/auth-models/authInputModel';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
+import {authInputModel, bearerAuthModel} from '../models/auth-models/authInputModel';
+import {
+    authUserOutputModel,
+    userOutputModel,
+    usersQueryRepositories
+} from '../repositories/users/users-query-repositories';
 import {usersService} from '../domain/users-service';
+import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
+import {jwtService} from '../application/jwt-service';
 
 export const authRouter = Router({})
 
@@ -32,16 +38,31 @@ const userPasswordValidation = body('password')
     .withMessage('Request should consist password with length more than 5 and less than 21')
 
 
-// Create blog
+authRouter.get('/me',
+    bearerAuthorisationMiddleware,
+    async (req: RequestWithBody<bearerAuthModel>, res: Response<ErrorType | authUserOutputModel>) => {
+
+        if (req.user) {
+            res.status(httpStatus.OK_200)
+            res.json(req.user)
+            return
+        }
+
+        res.sendStatus(httpStatus.UNATHORIZED_401)
+    })
+
+
+// Login
 authRouter.post('/login',
     userPasswordValidation,
     userLoginOrEmailValidation,
     inputValidationMiddleware,
-    async (req: RequestWithBody<authInputModel>, res: Response<ErrorType | blogTypeDB>) => {
+    async (req: RequestWithBody<authInputModel>,
+           res: Response<ErrorType | { accessToken: string }>
+    ) => {
         try {
 
             const userData = await usersQueryRepositories.getUserByEmailOrLogin(req.body.loginOrEmail)
-            console.log(userData)
 
             if (!userData) {
                 res.sendStatus(httpStatus.UNATHORIZED_401)
@@ -51,7 +72,12 @@ authRouter.post('/login',
             const result = await usersService.checkCredentials(userData, req.body)
 
             if (result) {
-                res.sendStatus(httpStatus.NO_CONTENT_204)
+                res.status(httpStatus.OK_200)
+                res.json(
+                    {
+                        accessToken: await jwtService.createJwt(userData)
+                    }
+                )
             } else {
                 res.sendStatus(httpStatus.UNATHORIZED_401)
             }

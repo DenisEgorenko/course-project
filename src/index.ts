@@ -7,6 +7,7 @@ import {runDb} from './database/db';
 import {blogsDatabase, postsDatabase, usersDatabase, videosDatabase} from './database/dbInterface';
 import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
+import {CommentsRouter} from './routes/comments-router';
 
 
 const express = require('express')
@@ -21,7 +22,7 @@ app.use('/blogs', blogsRouter)
 app.use('/posts', postsRouter)
 app.use('/users', usersRouter)
 app.use('/auth', authRouter)
-
+app.use('/comments', CommentsRouter)
 
 
 // Testing method

@@ -48,6 +48,12 @@ export const usersQueryRepositories = {
     },
 
 
+    async getUserByIdAuth(id: string) {
+        const foundBlog = await usersDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
+        return userToAuthOutputModel(foundBlog[0])
+    },
+
+
     async getUserByEmailOrLogin(loginOrEmail: string) {
         const foundBlog = await usersDatabase.find(
             {$or: [{email: loginOrEmail}, {login: loginOrEmail}]}, {projection: {_id: 0}}
@@ -90,6 +96,16 @@ export const userToOutputModel = (user: WithId<userTypeDB>): userOutputModel => 
 }
 
 
+export const userToAuthOutputModel = (user: WithId<userTypeDB>): authUserOutputModel => {
+
+    return {
+        userId: user.id,
+        login: user.login,
+        email: user.email,
+    }
+}
+
+
 export type usersOutputModel = {
     pagesCount: number,
     page: number,
@@ -103,5 +119,11 @@ export type userOutputModel = {
     login: string,
     email: string,
     createdAt: Date
+}
+
+export type authUserOutputModel = {
+    userId: string,
+    login: string,
+    email: string,
 }
 

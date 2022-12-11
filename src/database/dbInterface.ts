@@ -6,6 +6,7 @@ export const postsDatabase = dataBase.collection<postTypeDB>('posts')
 export const blogsDatabase = dataBase.collection<blogTypeDB>('blogs')
 export const videosDatabase = dataBase.collection<videoTypeDB>('videos')
 export const usersDatabase = dataBase.collection<userTypeDB>('users')
+export const commentsDatabase = dataBase.collection<commentsTypeDB>('comments')
 
 
 export type blogTypeDB = {
@@ -33,6 +34,15 @@ export type userTypeDB = {
     email: string,
     password: string,
     salt: string,
+    createdAt: Date
+}
+
+export type commentsTypeDB = {
+    id: string,
+    content: string,
+    userId: string,
+    postId: string,
+    userLogin: string,
     createdAt: Date
 }
 
