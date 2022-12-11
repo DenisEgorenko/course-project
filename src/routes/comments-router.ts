@@ -65,6 +65,13 @@ CommentsRouter.put('/:postId',
     inputValidationMiddleware,
     async (req: RequestWithParamsAndBody<commentsURImodel, UpdateCommentInputModel>, res: Response<ErrorType>) => {
 
+        const comment = await commentsQueryRepositories.getCommentById(req.params.postId)
+
+        // @ts-ignore
+        if (req.user.userId !== comment.userId) {
+            res.sendStatus(httpStatus.FORBIDDEN_403)
+        }
+
         if (!req.params.postId) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return;

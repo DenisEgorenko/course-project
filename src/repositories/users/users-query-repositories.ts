@@ -49,8 +49,13 @@ export const usersQueryRepositories = {
 
 
     async getUserByIdAuth(id: string) {
-        const foundBlog = await usersDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
-        return userToAuthOutputModel(foundBlog[0])
+        const foundUser = await usersDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
+
+        if (foundUser.length) {
+            return userToAuthOutputModel(foundUser[0])
+        } else {
+            return null
+        }
     },
 
 

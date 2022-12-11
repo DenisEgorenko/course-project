@@ -24,8 +24,11 @@ export const bearerAuthorisationMiddleware = async (req: Request, res: Response,
 
     const userId = await jwtService.getUserIdByToken(token)
 
+    const user = await usersQueryRepositories.getUserByIdAuth(userId)
 
-    if (userId) {
+    if (user) {
+
+        // @ts-ignore
         req.user = await usersQueryRepositories.getUserByIdAuth(userId)
         next()
     } else {
