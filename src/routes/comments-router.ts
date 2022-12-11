@@ -70,6 +70,7 @@ CommentsRouter.put('/:postId',
         // @ts-ignore
         if (req.user.userId !== comment.userId) {
             res.sendStatus(httpStatus.FORBIDDEN_403)
+            return
         }
 
         if (!req.params.postId) {
@@ -90,6 +91,15 @@ CommentsRouter.delete('/:postId',
     bearerAuthorisationMiddleware,
     inputValidationMiddleware,
     async (req: RequestWithParams<commentsURImodel>, res: Response) => {
+
+
+        const comment = await commentsQueryRepositories.getCommentById(req.params.postId)
+
+        // @ts-ignore
+        if (req.user.userId !== comment.userId) {
+            res.sendStatus(httpStatus.FORBIDDEN_403)
+            return
+        }
 
         if (!req.params.postId) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
