@@ -160,12 +160,14 @@ postsRouter.delete('/:id',
 
 postsRouter.get('/:postId/comments', async (req: RequestWithParamsAndQuery<commentsURImodel, commentsQueryModel>, res: Response<commentsOutputModel>) => {
 
-    const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query)
+    const post = await postsQueryRepositories.getPostById(req.params.postId)
 
-    if (!foundPost.items.length) {
+    if (!post) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
         return
     }
+
+    const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query)
 
     res.status(httpStatus.OK_200)
     res.json(foundPost)

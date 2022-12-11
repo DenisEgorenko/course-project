@@ -23,10 +23,10 @@ export const commentsQueryRepositories = {
 
         const skip: number = pageSize * (pageNumber - 1)
 
-        const totalCount = await commentsDatabase.countDocuments({})
+        const totalCount = await commentsDatabase.countDocuments({postId:postId})
         const pagesCount = Math.ceil(totalCount / pageSize)
 
-        const items = await commentsDatabase.find({}, {projection: {_id: 0}}).sort(sort).skip(skip).limit(pageSize).toArray();
+        const items = await commentsDatabase.find({postId:postId}, {projection: {_id: 0}}).sort(sort).skip(skip).limit(pageSize).toArray();
 
         return commentsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
     },
