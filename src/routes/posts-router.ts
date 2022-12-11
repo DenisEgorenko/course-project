@@ -162,7 +162,7 @@ postsRouter.get('/:postId/comments', async (req: RequestWithParamsAndQuery<comme
 
     const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query)
 
-    if (!foundPost) {
+    if (!foundPost.items.length) {
         res.sendStatus(httpStatus.NOT_FOUND_404)
         return
     }
