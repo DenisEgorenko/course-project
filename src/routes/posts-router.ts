@@ -179,17 +179,19 @@ postsRouter.post('/:postId/comments',
     commentContentValidation,
     inputValidationMiddleware,
     async (req: RequestWithParamsAndBody<commentsURImodel, CreateCommentInputModel>, res: Response<commentOutputModel>) => {
-        try {
-            // @ts-ignore
-            const id = await CommentsService.createNewComment(req.user, req.params.postId, req.body)
-            const result = await commentsQueryRepositories.getCommentById(id)
+        const post = await postsQueryRepositories.getPostById(req.params.postId)
 
-            if (result !== null) {
-                res.status(httpStatus.CREATED_201)
-                res.json(result)
-            }
-
-        } catch (e) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        if (!post) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
         }
+        // @ts-ignore
+        const id = await CommentsService.createNewComment(req.user, req.params.postId, req.body)
+        const result = await commentsQueryRepositories.getCommentById(id)
+
+        if (result !== null) {
+            res.status(httpStatus.CREATED_201)
+            res.json(result)
+        }
+
     })
