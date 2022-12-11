@@ -33,7 +33,12 @@ export const commentsQueryRepositories = {
 
     async getCommentById(id: string) {
         const foundComment = await commentsDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
-        return commentToOutputModel(foundComment[0])
+
+        if (foundComment.length) {
+            return commentToOutputModel(foundComment[0])
+        } else {
+            return null
+        }
     }
 }
 

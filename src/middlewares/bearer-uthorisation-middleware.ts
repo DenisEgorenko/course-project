@@ -27,13 +27,10 @@ export const bearerAuthorisationMiddleware = async (req: Request, res: Response,
     const user = await usersQueryRepositories.getUserByIdAuth(userId)
 
     if (user) {
-
         // @ts-ignore
-        req.user = await usersQueryRepositories.getUserByIdAuth(userId)
+        req.user = user
         next()
     } else {
         res.sendStatus(httpStatus.UNATHORIZED_401)
     }
-
-
 }

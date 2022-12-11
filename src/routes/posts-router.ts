@@ -181,8 +181,12 @@ postsRouter.post('/:postId/comments',
             // @ts-ignore
             const id = await CommentsService.createNewComment(req.user, req.params.postId, req.body)
             const result = await commentsQueryRepositories.getCommentById(id)
-            res.status(httpStatus.CREATED_201)
-            res.json(result)
+
+            if (result !== null) {
+                res.status(httpStatus.CREATED_201)
+                res.json(result)
+            }
+
         } catch (e) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }

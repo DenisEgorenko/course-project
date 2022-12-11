@@ -1,37 +1,13 @@
-import {Request, Response, Router} from 'express';
+import {Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
-import {
-    RequestWithBody,
-    RequestWithParams,
-    RequestWithParamsAndBody,
-    RequestWithParamsAndQuery,
-    RequestWithQuery
-} from '../types/requestTypes';
+import {RequestWithParams, RequestWithParamsAndBody} from '../types/requestTypes';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
-import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {postsRepositories} from '../repositories/posts/posts-repositories';
 import {postsURImodel} from '../models/posts-models/postsURImodel';
-import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
-import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
-import {postsOutputModel, postsQueryRepositories} from '../repositories/posts/posts-query-repositories';
-import {commentsTypeDB, postTypeDB} from '../database/dbInterface';
-import {postsService} from '../domain/posts-service';
-import {blogsService} from '../domain/blogs-service';
-import {blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
-import {postsQueryModel} from '../models/posts-models/postsQueryModel';
 import {commentsURImodel} from '../models/comments-models/commentsURImodel';
-import {
-    commentOutputModel,
-    commentsOutputModel,
-    commentsQueryRepositories
-} from '../repositories/comments/comments-query-repositories';
+import {commentOutputModel, commentsQueryRepositories} from '../repositories/comments/comments-query-repositories';
 import {CommentsService} from '../domain/comments-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
-import {CreateCommentInputModel} from '../models/comments-models/CreateCommentInputModel';
-import {usersService} from '../domain/users-service';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
-import {commentsQueryModel} from '../models/comments-models/commentsQueryModel';
 import {UpdateCommentInputModel} from '../models/comments-models/UpdateCommentInputModel';
 
 export const CommentsRouter = Router({})
@@ -65,17 +41,22 @@ CommentsRouter.put('/:postId',
     inputValidationMiddleware,
     async (req: RequestWithParamsAndBody<commentsURImodel, UpdateCommentInputModel>, res: Response<ErrorType>) => {
 
+        if (!req.params.postId) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
+
         const comment = await commentsQueryRepositories.getCommentById(req.params.postId)
+
+        if (comment === null) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
 
         // @ts-ignore
         if (req.user.userId !== comment.userId) {
             res.sendStatus(httpStatus.FORBIDDEN_403)
             return
-        }
-
-        if (!req.params.postId) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return;
         }
 
         if (!await CommentsService.updateComment(req.params.postId, req.body)) {
@@ -92,8 +73,17 @@ CommentsRouter.delete('/:postId',
     inputValidationMiddleware,
     async (req: RequestWithParams<commentsURImodel>, res: Response) => {
 
+        if (!req.params.postId) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
 
         const comment = await commentsQueryRepositories.getCommentById(req.params.postId)
+
+        if (comment === null) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
 
         // @ts-ignore
         if (req.user.userId !== comment.userId) {
@@ -101,10 +91,7 @@ CommentsRouter.delete('/:postId',
             return
         }
 
-        if (!req.params.postId) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return;
-        }
+
 
         const deleteVideo = await CommentsService.deleteComment(req.params.postId)
 
