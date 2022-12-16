@@ -69,6 +69,14 @@ const codeConfirmedValidation = body('code')
     })
     .withMessage('Email already registered')
 
+const emailConfirmedValidation = body('email')
+    .trim()
+    .custom(async email => {
+        const user = await usersQueryRepositories.getUserByEmailOrLogin('', email)
+        if (user.emailConfirmation.isConfirmed) return Promise.reject()
+    })
+    .withMessage('Email already confirmed')
+
 const emailDoesntValidation = body('email')
     .trim()
     .custom(async email => {
@@ -175,6 +183,7 @@ authRouter.post('/registration-confirmation',
 authRouter.post('/registration-email-resending',
     userEmailValidation,
     emailDoesntValidation,
+    emailConfirmedValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<resendInputModel>,
            res: Response<ErrorType>
