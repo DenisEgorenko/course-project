@@ -13,15 +13,19 @@ import {usersQueryModel} from '../../models/users-models/usersQueryModel';
 export const usersQueryRepositories = {
     async getAllUsers(query: usersQueryModel) {
 
-        const filter: { $or: [{ email?: RegExp }, { login?: RegExp }] } =
-            {$or: [{}, {}]}
+        const filter: { $or: any[] } =
+            {$or: []}
 
         if (query.searchEmailTerm) {
-            filter.$or[0].email = new RegExp(query.searchEmailTerm, 'i')
+            filter.$or.push({'accountData.email': new RegExp(query.searchEmailTerm, 'i')})
         }
 
         if (query.searchLoginTerm) {
-            filter.$or[1].login = new RegExp(query.searchLoginTerm, 'i')
+            filter.$or.push({'accountData.login': new RegExp(query.searchLoginTerm, 'i')})
+        }
+
+        if (!filter.$or.length) {
+            filter.$or.push({})
         }
 
 
@@ -43,13 +47,15 @@ export const usersQueryRepositories = {
     },
 
     async getUserById(id: string) {
-        const foundBlog = await usersDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
+        const foundBlog = await usersDatabase.find({'accountData.id': id}, {projection: {_id: 0}}).toArray()
         return userToOutputModel(foundBlog[0])
     },
 
 
     async getUserByIdAuth(id: string) {
-        const foundUser = await usersDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
+        const foundUser = await usersDatabase.find({
+            'accountData.id': id
+        }, {projection: {_id: 0}}).toArray()
 
         if (foundUser.length) {
             return userToAuthOutputModel(foundUser[0])
@@ -61,11 +67,17 @@ export const usersQueryRepositories = {
 
     async getUserByEmailOrLogin(loginOrEmail: string) {
         const foundBlog = await usersDatabase.find(
-            {$or: [{email: loginOrEmail}, {login: loginOrEmail}]}, {projection: {_id: 0}}
+            {$or: [{'accountData.email': loginOrEmail}, {'accountData.login': loginOrEmail}]}, {projection: {_id: 0}}
+        ).toArray()
+        return foundBlog[0]
+    },
+
+    async getUserByConfirmationCode(code: string) {
+        const foundBlog = await usersDatabase.find(
+            {'emailConfirmation.confirmationCode': code}, {projection: {_id: 0}}
         ).toArray()
         return foundBlog[0]
     }
-
 }
 
 export const usersToOutputModel = (pagesCount: number,
@@ -81,10 +93,10 @@ export const usersToOutputModel = (pagesCount: number,
         pageSize: pageSize,
         totalCount: totalCount,
         items: items.map(user => ({
-            id: user.id,
-            login: user.login,
-            email: user.email,
-            createdAt: user.createdAt
+            id: user.accountData.id,
+            login: user.accountData.login,
+            email: user.accountData.email,
+            createdAt: user.accountData.createdAt
         }))
     }
 }
@@ -93,10 +105,10 @@ export const usersToOutputModel = (pagesCount: number,
 export const userToOutputModel = (user: WithId<userTypeDB>): userOutputModel => {
 
     return {
-        id: user.id,
-        login: user.login,
-        email: user.email,
-        createdAt: user.createdAt
+        id: user.accountData.id,
+        login: user.accountData.login,
+        email: user.accountData.email,
+        createdAt: user.accountData.createdAt
     }
 }
 
@@ -104,9 +116,9 @@ export const userToOutputModel = (user: WithId<userTypeDB>): userOutputModel => 
 export const userToAuthOutputModel = (user: WithId<userTypeDB>): authUserOutputModel => {
 
     return {
-        userId: user.id,
-        login: user.login,
-        email: user.email,
+        userId: user.accountData.id,
+        login: user.accountData.login,
+        email: user.accountData.email,
     }
 }
 

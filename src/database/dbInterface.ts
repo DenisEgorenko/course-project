@@ -1,5 +1,6 @@
 import {dataBase} from './db';
 import {resolutions} from '../models/videos-models/resolutionsModel';
+import {v4 as uuidv4} from 'uuid';
 
 
 export const postsDatabase = dataBase.collection<postTypeDB>('posts')
@@ -29,12 +30,19 @@ export type postTypeDB = {
 
 
 export type userTypeDB = {
-    id: string,
-    login: string,
-    email: string,
-    password: string,
-    salt: string,
-    createdAt: Date
+    accountData: {
+        id: string,
+        login: string,
+        email: string,
+        password: string,
+        salt: string,
+        createdAt: Date
+    },
+    emailConfirmation: {
+        confirmationCode: string | null,
+        expirationDate: Date,
+        isConfirmed: boolean
+    }
 }
 
 export type commentsTypeDB = {

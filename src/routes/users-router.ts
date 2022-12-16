@@ -62,6 +62,7 @@ usersRouter.post('/',
             res.status(httpStatus.CREATED_201)
             res.json(result)
         } catch (e) {
+            console.log(e)
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
     })

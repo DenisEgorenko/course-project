@@ -1,24 +1,17 @@
 import {Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
-import {RequestWithBody, RequestWithParams, RequestWithQuery} from '../types/requestTypes';
+import {RequestWithBody} from '../types/requestTypes';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsURImodel} from '../models/blogs-models/blogsURImodel';
-import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {blogsOutputModel, blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
-import {blogTypeDB, userTypeDB} from '../database/dbInterface';
-import {blogsService} from '../domain/blogs-service';
-import {blogsQueryModel} from '../models/blogs-models/blogsQueryModel';
 import {authInputModel, bearerAuthModel} from '../models/auth-models/authInputModel';
-import {
-    authUserOutputModel,
-    userOutputModel,
-    usersQueryRepositories
-} from '../repositories/users/users-query-repositories';
+import {authUserOutputModel, usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {usersService} from '../domain/users-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {jwtService} from '../application/jwt-service';
+import {authService} from '../domain/auth-service';
+import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
+import {CreateBlogInputModel} from '../models/auth-models/EmailConfirmationInputModel';
+import {resendInputModel} from '../models/auth-models/resendInputModel';
 
 export const authRouter = Router({})
 
@@ -42,8 +35,10 @@ authRouter.get('/me',
     bearerAuthorisationMiddleware,
     async (req: RequestWithBody<bearerAuthModel>, res: Response<ErrorType | authUserOutputModel>) => {
 
+        // @ts-ignore
         if (req.user) {
             res.status(httpStatus.OK_200)
+            // @ts-ignore
             res.json(req.user)
             return
         }
@@ -51,6 +46,19 @@ authRouter.get('/me',
         res.sendStatus(httpStatus.UNATHORIZED_401)
     })
 
+const userLoginValidation = body('login')
+    .trim()
+    .isLength({
+        min: 3,
+        max: 10
+    })
+    .matches(`^[a-zA-Z0-9_-]*$`)
+    .withMessage('Request should consist login with length more than 2 and less than 11')
+
+const userEmailValidation = body('email')
+    .trim()
+    .matches(`^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`)
+    .withMessage('Request should consist email')
 
 // Login
 authRouter.post('/login',
@@ -65,6 +73,11 @@ authRouter.post('/login',
             const userData = await usersQueryRepositories.getUserByEmailOrLogin(req.body.loginOrEmail)
 
             if (!userData) {
+                res.sendStatus(httpStatus.UNATHORIZED_401)
+                return
+            }
+
+            if (!userData.emailConfirmation.isConfirmed) {
                 res.sendStatus(httpStatus.UNATHORIZED_401)
                 return
             }
@@ -85,4 +98,54 @@ authRouter.post('/login',
         } catch (e) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
         }
+    })
+
+
+authRouter.post('/registration',
+    userPasswordValidation,
+    userLoginValidation,
+    userEmailValidation,
+    inputValidationMiddleware,
+    async (req: RequestWithBody<CreateUserInputModel>,
+           res: Response<ErrorType>
+    ) => {
+        const user = await authService.createUser(req.body)
+        if (user) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+            return
+        }
+    })
+
+
+authRouter.post('/registration-confirmation',
+    inputValidationMiddleware,
+    async (req: RequestWithBody<CreateBlogInputModel>,
+           res: Response<ErrorType>
+    ) => {
+        const result = await authService.confirmEmail(req.body.code)
+
+        if (result) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
+
+    })
+
+
+authRouter.post('/registration-email-resending',
+    userEmailValidation,
+    inputValidationMiddleware,
+    async (req: RequestWithBody<resendInputModel>,
+           res: Response<ErrorType>
+    ) => {
+
+        const result = await authService.resendConfirmEmail(req.body.email)
+
+        if (result) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
+
     })

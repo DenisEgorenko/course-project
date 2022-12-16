@@ -75,7 +75,7 @@ describe('Posts CRUD tests', function () {
                 shortDescription: 'Короткое описание',
                 content: 'Контент',
                 blogId: blog.id,
-                blogName: '',
+                blogName: blog.id,
                 createdAt: expect.any(String)
             }
         )

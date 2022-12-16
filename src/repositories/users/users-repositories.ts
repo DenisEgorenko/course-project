@@ -1,7 +1,4 @@
-import {CreatePostInputModel} from '../../models/posts-models/CreatePostInputModel';
-import {UpdatePostInputModel} from '../../models/posts-models/UpdatePostInputModel';
-import {blogsDatabase, postsDatabase, postTypeDB, usersDatabase, userTypeDB} from '../../database/dbInterface';
-import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
+import {usersDatabase, userTypeDB} from '../../database/dbInterface';
 import {UserFilterQuery} from '../../domain/users-service';
 
 
@@ -9,7 +6,7 @@ export const usersRepositories = {
 
     async createNewUser(newUser: userTypeDB) {
         try {
-            await  usersDatabase.insertOne({...newUser})
+            await usersDatabase.insertOne({...newUser})
             return true
         } catch (e) {
             return false
@@ -21,5 +18,25 @@ export const usersRepositories = {
         return result.deletedCount >= 1
     },
 
+    async updateConfirmation(userId: string) {
+        const result = await usersDatabase.updateOne(
+            {'accountData.id': userId},
+            {$set: {'emailConfirmation.isConfirmed': true}}
+        )
+        return result.modifiedCount >= 1;
+    },
 
+
+    async changeConfirmationData(userId: string, newCode: string, newExpDate: Date) {
+        const result = await usersDatabase.updateOne(
+            {'accountData.id': userId},
+            {
+                $set: {
+                    'emailConfirmation.confirmationCode': newCode,
+                    'emailConfirmation.expirationDate': newExpDate
+                }
+            }
+        )
+        return result.modifiedCount >= 1;
+    }
 }

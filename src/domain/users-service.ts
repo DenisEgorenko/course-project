@@ -6,6 +6,7 @@ import {usersRepositories} from '../repositories/users/users-repositories';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import bcrypt from 'bcrypt'
 import {authInputModel} from '../models/auth-models/authInputModel';
+import {passwordService} from '../application/password-service';
 
 export type updateBlogQuery = {
     $set: {
@@ -24,31 +25,39 @@ export const usersService = {
 
     async createNewUser(requestData: CreateUserInputModel): Promise<string> {
 
-        const passwordSalt = await bcrypt.genSalt(10)
-        const passwordHash = await this._generateHash(requestData.password, passwordSalt)
+        const passwordSalt = await passwordService.generateSalt()
+        const passwordHash = await passwordService.generateHash(requestData.password, passwordSalt)
 
         const newUser: userTypeDB = {
-            id: (+(new Date())).toString(),
-            login: requestData.login,
-            email: requestData.email,
-            password: passwordHash,
-            salt: passwordSalt,
-            createdAt: new Date()
+            accountData: {
+                id: (+(new Date())).toString(),
+                login: requestData.login,
+                email: requestData.email,
+                password: passwordHash,
+                salt: passwordSalt,
+                createdAt: new Date()
+            },
+            emailConfirmation: {
+                confirmationCode: null,
+                expirationDate: new Date(),
+                isConfirmed: true
+            }
         }
 
         try {
             await usersRepositories.createNewUser(newUser)
-            return newUser.id
+            return newUser.accountData.id
         } catch (e) {
             return ''
         }
     },
 
     async checkCredentials(userData: userTypeDB, requestData: authInputModel): Promise<boolean> {
+        const passwordHash = await passwordService.generateHash(requestData.password, userData.accountData.salt)
 
-        const passwordHash = await this._generateHash(requestData.password, userData.salt)
 
-        return passwordHash === userData.password;
+
+        return passwordHash === userData.accountData.password;
     },
 
     async deleteUser(id: string) {
@@ -58,7 +67,5 @@ export const usersService = {
         return await usersRepositories.deleteUser(filterQuery)
     },
 
-    async _generateHash(password: string, salt: string) {
-        return await bcrypt.hash(password, salt)
-    }
+
 }
