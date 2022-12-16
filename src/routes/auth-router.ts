@@ -30,6 +30,28 @@ const userPasswordValidation = body('password')
     })
     .withMessage('Request should consist password with length more than 5 and less than 21')
 
+const userLoginValidation = body('login')
+    .trim()
+    .isLength({
+        min: 3,
+        max: 10
+    })
+    .matches(`^[a-zA-Z0-9_-]*$`)
+    .custom(async login => {
+        const user = await usersQueryRepositories.getUserByEmailOrLogin(login, '')
+        if (user) return Promise.reject()
+    })
+    .withMessage('Request should consist login with length more than 2 and less than 11')
+
+const userEmailValidation = body('email')
+    .trim()
+    .matches(`^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`)
+    .custom(async email => {
+        const user = await usersQueryRepositories.getUserByEmailOrLogin('', email)
+        if (user) return Promise.reject()
+    })
+    .withMessage('Request should consist email')
+
 
 authRouter.get('/me',
     bearerAuthorisationMiddleware,
@@ -46,19 +68,6 @@ authRouter.get('/me',
         res.sendStatus(httpStatus.UNATHORIZED_401)
     })
 
-const userLoginValidation = body('login')
-    .trim()
-    .isLength({
-        min: 3,
-        max: 10
-    })
-    .matches(`^[a-zA-Z0-9_-]*$`)
-    .withMessage('Request should consist login with length more than 2 and less than 11')
-
-const userEmailValidation = body('email')
-    .trim()
-    .matches(`^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`)
-    .withMessage('Request should consist email')
 
 // Login
 authRouter.post('/login',
