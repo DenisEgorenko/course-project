@@ -65,12 +65,20 @@ export const usersQueryRepositories = {
     },
 
 
-    async getUserByEmailOrLogin(loginOrEmail: string) {
+    async getUserByEmailOrLogin(login?: string, email?: string) {
         const foundBlog = await usersDatabase.find(
-            {$or: [{'accountData.email': loginOrEmail}, {'accountData.login': loginOrEmail}]}, {projection: {_id: 0}}
+            {$or: [{'accountData.email': email ? email : login}, {'accountData.login': login ? login : email}]}, {projection: {_id: 0}}
         ).toArray()
         return foundBlog[0]
     },
+
+
+    // async getUserByEmailOrLogin(loginOrEmail: string) {
+    //     const foundBlog = await usersDatabase.find(
+    //         {$or: [{'accountData.email': loginOrEmail}, {'accountData.login': loginOrEmail}]}, {projection: {_id: 0}}
+    //     ).toArray()
+    //     return foundBlog[0]
+    // },
 
     async getUserByConfirmationCode(code: string) {
         const foundBlog = await usersDatabase.find(

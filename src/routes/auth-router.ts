@@ -113,6 +113,9 @@ authRouter.post('/registration',
         if (user) {
             res.sendStatus(httpStatus.NO_CONTENT_204)
             return
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return
         }
     })
 

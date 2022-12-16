@@ -10,6 +10,11 @@ import {usersQueryRepositories} from '../repositories/users/users-query-reposito
 export const authService = {
     async createUser(userData: CreateUserInputModel) {
 
+        const userExist = await usersQueryRepositories.getUserByEmailOrLogin(userData.login, userData.email)
+
+        if (userExist) return false
+
+
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
 
