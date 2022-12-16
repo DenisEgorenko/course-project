@@ -37,21 +37,45 @@ const userLoginValidation = body('login')
         max: 10
     })
     .matches(`^[a-zA-Z0-9_-]*$`)
+    .withMessage('Request should consist login with length more than 2 and less than 11')
+
+const userLoginExistValidation = body('login')
+    .trim()
     .custom(async login => {
         const user = await usersQueryRepositories.getUserByEmailOrLogin(login, '')
         if (user) return Promise.reject()
     })
-    .withMessage('Request should consist login with length more than 2 and less than 11')
+    .withMessage('User already exist')
 
 const userEmailValidation = body('email')
     .trim()
     .matches(`^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$`)
+    .withMessage('Request should consist email')
+
+
+const userEmailExistValidation = body('email')
+    .trim()
     .custom(async email => {
         const user = await usersQueryRepositories.getUserByEmailOrLogin('', email)
         if (user) return Promise.reject()
     })
-    .withMessage('Request should consist email')
+    .withMessage('Email already registered')
 
+const codeConfirmedValidation = body('code')
+    .trim()
+    .custom(async code => {
+        const user = await usersQueryRepositories.getUserByConfirmationCode(code)
+        if (user.emailConfirmation.isConfirmed) return Promise.reject()
+    })
+    .withMessage('Email already registered')
+
+const emailDoesntValidation = body('email')
+    .trim()
+    .custom(async email => {
+        const user = await usersQueryRepositories.getUserByEmailOrLogin('', email)
+        if (!user) return Promise.reject()
+    })
+    .withMessage('Email doesnt exist')
 
 authRouter.get('/me',
     bearerAuthorisationMiddleware,
@@ -113,7 +137,9 @@ authRouter.post('/login',
 authRouter.post('/registration',
     userPasswordValidation,
     userLoginValidation,
+    userLoginExistValidation,
     userEmailValidation,
+    userEmailExistValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateUserInputModel>,
            res: Response<ErrorType>
@@ -130,6 +156,7 @@ authRouter.post('/registration',
 
 
 authRouter.post('/registration-confirmation',
+    codeConfirmedValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateBlogInputModel>,
            res: Response<ErrorType>
@@ -147,6 +174,7 @@ authRouter.post('/registration-confirmation',
 
 authRouter.post('/registration-email-resending',
     userEmailValidation,
+    emailDoesntValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<resendInputModel>,
            res: Response<ErrorType>
