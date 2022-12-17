@@ -227,7 +227,7 @@ authRouter.post('/logout',
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
 
         if (logoutResult) {
-            res.cookie('refreshToken', null, {httpOnly: true, secure: true}).sendStatus(httpStatus.NO_CONTENT_204)
+            res.clearCookie('refreshToken').sendStatus(httpStatus.NO_CONTENT_204)
             return
         } else {
             res.sendStatus(httpStatus.UNATHORIZED_401)
