@@ -224,6 +224,13 @@ authRouter.post('/logout',
             return
         }
 
+        const userAccessToken = await usersQueryRepositories.getUserAccessTokenById(accessData.userId)
+
+        if (accessData.refreshToken !== userAccessToken) {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
+        }
+
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
 
         if (logoutResult) {
