@@ -1,8 +1,8 @@
 import {Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody} from '../types/requestTypes';
-import {body} from 'express-validator';
-import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
+import {body, cookie} from 'express-validator';
+import {inputValidationMiddleware, inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
 import {authInputModel, bearerAuthModel} from '../models/auth-models/authInputModel';
 import {authUserOutputModel, usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {usersService} from '../domain/users-service';
@@ -12,6 +12,9 @@ import {authService} from '../domain/auth-service';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {CreateBlogInputModel} from '../models/auth-models/EmailConfirmationInputModel';
 import {resendInputModel} from '../models/auth-models/resendInputModel';
+import {Request} from 'express';
+import {accessDataType} from '../models/auth-models/assessDataType';
+import * as http from 'http';
 
 export const authRouter = Router({})
 
@@ -85,6 +88,11 @@ const emailDoesntValidation = body('email')
     })
     .withMessage('Email doesnt exist')
 
+
+const cookieRefreshTokenValidation = cookie('refreshToken')
+    .isJWT()
+    .withMessage('RefreshToken doesnt exist')
+
 authRouter.get('/me',
     bearerAuthorisationMiddleware,
     async (req: RequestWithBody<bearerAuthModel>, res: Response<ErrorType | authUserOutputModel>) => {
@@ -123,13 +131,16 @@ authRouter.post('/login',
                 return
             }
 
-            const result = await usersService.checkCredentials(userData, req.body)
+            const validPassword = await usersService.checkCredentials(userData, req.body)
 
-            if (result) {
+            const refreshToken = await authService.createJWTRefreshToken(userData.accountData.id)
+
+            if (validPassword) {
                 res.status(httpStatus.OK_200)
+                res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: false})
                 res.json(
                     {
-                        accessToken: await jwtService.createJwt(userData)
+                        accessToken: await jwtService.createJwt(userData.accountData.id)
                     }
                 )
             } else {
@@ -195,6 +206,60 @@ authRouter.post('/registration-email-resending',
             res.sendStatus(httpStatus.NO_CONTENT_204)
         } else {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
+
+    })
+
+
+authRouter.post('/logout',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    async (req: Request,
+           res: Response<ErrorType>
+    ) => {
+        const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
+
+        if (!accessData) {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
+        }
+
+        const logoutResult = await authService.logOutWithRefreshToken(accessData)
+
+        if (logoutResult) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+        }
+    })
+
+
+authRouter.post('/refresh-token',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    async (req: RequestWithBody<CreateUserInputModel>,
+           res: Response
+    ) => {
+
+        const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
+
+        if (!accessData) {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
+        }
+
+        const refreshToken = await authService.createJWTRefreshToken(accessData.userId)
+
+        if (refreshToken) {
+            res.status(httpStatus.OK_200)
+            res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: false})
+            res.json(
+                {
+                    accessToken: await jwtService.createJwt(accessData.userId)
+                }
+            )
+        } else {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
         }
 
     })

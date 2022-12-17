@@ -6,14 +6,12 @@ import {v4 as uuidv4} from 'uuid';
 import add from 'date-fns/add'
 import {EmailManager} from '../managers/email-manager';
 import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
+import {jwtService} from '../application/jwt-service';
+import {accessDataType} from '../models/auth-models/assessDataType';
+import {usersService} from './users-service';
 
 export const authService = {
     async createUser(userData: CreateUserInputModel) {
-
-        // const userExist = await usersQueryRepositories.getUserByEmailOrLogin(userData.login, userData.email)
-        //
-        // if (userExist) return false
-
 
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
@@ -25,6 +23,7 @@ export const authService = {
                 email: userData.email,
                 password: passwordHash,
                 salt: passwordSalt,
+                refreshToken: null,
                 createdAt: new Date()
             },
             emailConfirmation: {
@@ -77,5 +76,20 @@ export const authService = {
         }
 
         return false
+    },
+
+
+    async createJWTRefreshToken(userId: string) {
+        const refreshToken = uuidv4()
+        const jwtToken = await jwtService.createRefreshToken(userId, refreshToken)
+
+        await usersRepositories.updateRefreshToken(userId, refreshToken)
+
+        return jwtToken
+    },
+
+    async logOutWithRefreshToken(accessData: accessDataType) {
+
+        return await usersRepositories.updateRefreshToken(accessData.userId, null)
     }
 }

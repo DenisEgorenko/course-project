@@ -35,6 +35,7 @@ export const usersService = {
                 email: requestData.email,
                 password: passwordHash,
                 salt: passwordSalt,
+                refreshToken: null,
                 createdAt: new Date()
             },
             emailConfirmation: {
@@ -54,9 +55,6 @@ export const usersService = {
 
     async checkCredentials(userData: userTypeDB, requestData: authInputModel): Promise<boolean> {
         const passwordHash = await passwordService.generateHash(requestData.password, userData.accountData.salt)
-
-
-
         return passwordHash === userData.accountData.password;
     },
 

@@ -26,6 +26,14 @@ export const usersRepositories = {
         return result.modifiedCount >= 1;
     },
 
+    async updateRefreshToken(userId: string, refreshToken: string | null) {
+        const result = await usersDatabase.updateOne(
+            {'accountData.id': userId},
+            {$set: {'accountData.refreshToken': refreshToken}}
+        )
+        return result.modifiedCount >= 1;
+    },
+
 
     async changeConfirmationData(userId: string, newCode: string, newExpDate: Date) {
         const result = await usersDatabase.updateOne(

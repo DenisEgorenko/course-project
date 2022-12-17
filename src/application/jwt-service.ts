@@ -4,8 +4,8 @@ import jwt from 'jsonwebtoken'
 export const jwtService = {
 
 
-    async createJwt(user: userTypeDB) {
-        const token = jwt.sign({userId: user.accountData.id}, 'secret', {expiresIn: '1h'})
+    async createJwt(userId: string) {
+        const token = jwt.sign({userId}, 'secret', {expiresIn: '10s'})
 
         return token
     },
@@ -17,5 +17,25 @@ export const jwtService = {
         } catch (e) {
             return null
         }
-    }
+    },
+
+
+    async createRefreshToken(userId: string, refreshToken: string) {
+        const token = jwt.sign({
+            userId: userId,
+            refreshToken: refreshToken
+        }, 'secret', {expiresIn: '20s'})
+        return token
+    },
+
+
+    async getAccessDataFromJWT(jwtToken: string) {
+        try {
+            const result: any = jwt.verify(jwtToken, 'secret')
+            return result
+        } catch (e) {
+            return false
+        }
+    },
+
 }

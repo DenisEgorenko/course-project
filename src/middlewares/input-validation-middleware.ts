@@ -16,3 +16,15 @@ export const inputValidationMiddleware = (req: Request<any>, res: Response<Error
         next()
     }
 }
+
+
+export const inputValidationMiddleware_401 = (req: Request<any>, res: Response<ErrorType>, next: NextFunction) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        res.status(401)
+        return
+    } else {
+        next()
+    }
+}

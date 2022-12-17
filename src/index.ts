@@ -8,13 +8,14 @@ import {blogsDatabase, commentsDatabase, postsDatabase, usersDatabase, videosDat
 import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
 import {CommentsRouter} from './routes/comments-router';
+import cookies from 'cookie-parser'
 
 
 const express = require('express')
 export const app = express()
 const port = 3000
 app.use(express.json())
-
+app.use(cookies())
 
 // Videos CRUD
 app.use('/videos', videosRouter)

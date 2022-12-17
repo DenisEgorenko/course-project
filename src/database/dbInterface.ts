@@ -36,6 +36,7 @@ export type userTypeDB = {
         email: string,
         password: string,
         salt: string,
+        refreshToken: string | null,
         createdAt: Date
     },
     emailConfirmation: {
