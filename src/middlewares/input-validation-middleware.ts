@@ -22,7 +22,7 @@ export const inputValidationMiddleware_401 = (req: Request<any>, res: Response<E
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        res.status(401)
+        res.sendStatus(401)
         return
     } else {
         next()

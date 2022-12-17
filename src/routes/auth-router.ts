@@ -227,9 +227,11 @@ authRouter.post('/logout',
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
 
         if (logoutResult) {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
+            res.cookie('refreshToken', null, {httpOnly: true, secure: false}).sendStatus(httpStatus.NO_CONTENT_204)
+            return
         } else {
             res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
         }
     })
 
@@ -237,13 +239,23 @@ authRouter.post('/logout',
 authRouter.post('/refresh-token',
     cookieRefreshTokenValidation,
     inputValidationMiddleware_401,
-    async (req: RequestWithBody<CreateUserInputModel>,
+    async (req: Request,
            res: Response
     ) => {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
+        console.log(accessData)
+
+
         if (!accessData) {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
+        }
+
+        const userAccessToken = await usersQueryRepositories.getUserAccessTokenById(accessData.userId)
+
+        if (accessData.refreshToken !== userAccessToken) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
@@ -260,6 +272,7 @@ authRouter.post('/refresh-token',
             )
         } else {
             res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
         }
 
     })

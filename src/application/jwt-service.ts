@@ -30,6 +30,7 @@ export const jwtService = {
 
 
     async getAccessDataFromJWT(jwtToken: string) {
+        console.log(jwtToken)
         try {
             const result: any = jwt.verify(jwtToken, 'secret')
             return result
