@@ -1,6 +1,5 @@
 import {dataBase} from './db';
 import {resolutions} from '../models/videos-models/resolutionsModel';
-import {v4 as uuidv4} from 'uuid';
 
 
 export const postsDatabase = dataBase.collection<postTypeDB>('posts')
@@ -8,6 +7,7 @@ export const blogsDatabase = dataBase.collection<blogTypeDB>('blogs')
 export const videosDatabase = dataBase.collection<videoTypeDB>('videos')
 export const usersDatabase = dataBase.collection<userTypeDB>('users')
 export const commentsDatabase = dataBase.collection<commentsTypeDB>('comments')
+export const securityDevicesDatabase = dataBase.collection<securityDevicesTypeDB>('securityDevices')
 
 
 export type blogTypeDB = {
@@ -64,4 +64,12 @@ export type videoTypeDB = {
     createdAt: string
     publicationDate: string
     availableResolutions: Array<resolutions>
+}
+
+export type securityDevicesTypeDB = {
+    ip: string,
+    title: string,
+    lastActiveDate: Date,
+    deviceId: string,
+    userId: string
 }

@@ -15,6 +15,8 @@ import {resendInputModel} from '../models/auth-models/resendInputModel';
 import {Request} from 'express';
 import {accessDataType} from '../models/auth-models/assessDataType';
 import * as http from 'http';
+import {securityDevicesQueryRepositories} from "../repositories/securityDevices/security-devices-query-repositories";
+import {requestsAttemptsAuthorisationMiddleware} from "../middlewares/requests-attempts-middleware";
 
 export const authRouter = Router({})
 
@@ -111,6 +113,7 @@ authRouter.get('/me',
 
 // Login
 authRouter.post('/login',
+    requestsAttemptsAuthorisationMiddleware,
     userPasswordValidation,
     userLoginOrEmailValidation,
     inputValidationMiddleware,
@@ -133,11 +136,17 @@ authRouter.post('/login',
 
             const validPassword = await usersService.checkCredentials(userData, req.body)
 
-            const refreshToken = await authService.createJWTRefreshToken(userData.accountData.id)
+            // const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'][0] : req.socket.remoteAddress || 'undefined'
+
+            const refreshToken = await authService.createSecuritySession(
+                userData.accountData.id,
+                req.ip,
+                req.headers['user-agent'] || 'undefined'
+            )
 
             if (validPassword) {
                 res.status(httpStatus.OK_200)
-                res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
+                res.cookie('refreshToken', refreshToken, {httpOnly: false, secure: false})
                 res.json(
                     {
                         accessToken: await jwtService.createJwt(userData.accountData.id)
@@ -154,6 +163,7 @@ authRouter.post('/login',
 
 
 authRouter.post('/registration',
+    requestsAttemptsAuthorisationMiddleware,
     userPasswordValidation,
     userLoginValidation,
     userLoginExistValidation,
@@ -175,6 +185,7 @@ authRouter.post('/registration',
 
 
 authRouter.post('/registration-confirmation',
+    requestsAttemptsAuthorisationMiddleware,
     codeConfirmedValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<CreateBlogInputModel>,
@@ -192,6 +203,7 @@ authRouter.post('/registration-confirmation',
 
 
 authRouter.post('/registration-email-resending',
+    requestsAttemptsAuthorisationMiddleware,
     userEmailValidation,
     emailDoesntValidation,
     emailConfirmedValidation,
@@ -252,10 +264,16 @@ authRouter.post('/refresh-token',
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
-        console.log(accessData)
-
-
         if (!accessData) {
+            res.sendStatus(httpStatus.UNATHORIZED_401)
+            return
+        }
+
+        const sessionExist = await securityDevicesQueryRepositories.findActiveSessionByDeviceId(accessData.deviceId)
+
+        console.log(sessionExist)
+
+        if (!sessionExist.length) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
@@ -267,11 +285,16 @@ authRouter.post('/refresh-token',
             return
         }
 
-        const refreshToken = await authService.createJWTRefreshToken(accessData.userId)
+        const refreshToken = await authService.updateSecuritySession(
+            accessData.userId,
+            req.ip,
+            req.headers['user-agent'] || 'undefined',
+            accessData.deviceId
+        )
 
         if (refreshToken) {
             res.status(httpStatus.OK_200)
-            res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
+            res.cookie('refreshToken', refreshToken, {httpOnly: false, secure: false})
             res.json(
                 {
                     accessToken: await jwtService.createJwt(accessData.userId)

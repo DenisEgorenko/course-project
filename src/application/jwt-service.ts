@@ -1,4 +1,3 @@
-import {userTypeDB} from '../database/dbInterface';
 import jwt from 'jsonwebtoken'
 
 export const jwtService = {
@@ -20,17 +19,17 @@ export const jwtService = {
     },
 
 
-    async createRefreshToken(userId: string, refreshToken: string) {
+    async createRefreshToken(userId: string, deviceId: string, refreshToken: string) {
         const token = jwt.sign({
             userId: userId,
+            deviceId: deviceId,
             refreshToken: refreshToken
-        }, 'secret', {expiresIn: '20s'})
+        }, 'secret', {expiresIn: '20m'})
         return token
     },
 
 
     async getAccessDataFromJWT(jwtToken: string) {
-        console.log(jwtToken)
         try {
             const result: any = jwt.verify(jwtToken, 'secret')
             return result

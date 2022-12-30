@@ -9,6 +9,7 @@ import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
 import {CommentsRouter} from './routes/comments-router';
 import cookies from 'cookie-parser'
+import {SecurityDevicesRouter} from "./routes/security-devices-router";
 
 
 const express = require('express')
@@ -16,6 +17,7 @@ export const app = express()
 const port = 3000
 app.use(express.json())
 app.use(cookies())
+app.set('trust proxy', true)
 
 // Videos CRUD
 app.use('/videos', videosRouter)
@@ -24,6 +26,7 @@ app.use('/posts', postsRouter)
 app.use('/users', usersRouter)
 app.use('/auth', authRouter)
 app.use('/comments', CommentsRouter)
+app.use('/security', SecurityDevicesRouter)
 
 
 // Testing method

@@ -1,6 +1,6 @@
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {passwordService} from '../application/password-service';
-import {userTypeDB} from '../database/dbInterface';
+import {securityDevicesTypeDB, userTypeDB} from '../database/dbInterface';
 import {usersRepositories} from '../repositories/users/users-repositories';
 import {v4 as uuidv4} from 'uuid';
 import add from 'date-fns/add'
@@ -9,6 +9,7 @@ import {usersQueryRepositories} from '../repositories/users/users-query-reposito
 import {jwtService} from '../application/jwt-service';
 import {accessDataType} from '../models/auth-models/assessDataType';
 import {usersService} from './users-service';
+import {securityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
 
 export const authService = {
     async createUser(userData: CreateUserInputModel) {
@@ -79,13 +80,52 @@ export const authService = {
     },
 
 
-    async createJWTRefreshToken(userId: string) {
+    async createSecuritySession(userId: string, ip: string, title: string) {
         const refreshToken = uuidv4()
-        const jwtToken = await jwtService.createRefreshToken(userId, refreshToken)
+        const deviceId = uuidv4()
+        const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
+
+        const newSession: securityDevicesTypeDB = {
+            ip,
+            title,
+            lastActiveDate: new Date(),
+            deviceId,
+            userId
+        }
+
+        const saveSecurityDevices = await securityDevicesRepositories.createNewSession(newSession)
 
         await usersRepositories.updateRefreshToken(userId, refreshToken)
 
         return jwtToken
+    },
+
+    async updateSecuritySession(userId: string, ip: string, title: string, deviceId: string) {
+        const refreshToken = uuidv4()
+
+
+
+        const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
+
+        const saveSecurityDevices = await securityDevicesRepositories.updateSession(deviceId)
+
+        await usersRepositories.updateRefreshToken(userId, refreshToken)
+
+        return jwtToken
+    },
+
+    async removeAllSecuritySessions(userId: string, deviceId: string) {
+
+        await securityDevicesRepositories.removeAllSecuritySessions(userId, deviceId)
+
+        return true
+    },
+
+    async removeSecuritySession(deviceId: string) {
+
+        await securityDevicesRepositories.removeSecuritySession(deviceId)
+
+        return true
     },
 
     async logOutWithRefreshToken(accessData: accessDataType) {

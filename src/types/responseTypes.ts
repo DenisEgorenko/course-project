@@ -8,8 +8,8 @@ export enum httpStatus {
     NOT_FOUND_404 = 404,
     UNATHORIZED_401 = 401,
     FORBIDDEN_403 = 403,
+    TOO_MANY_REQUESTS_429 = 429
 }
-
 
 
 type errorMessage = {
