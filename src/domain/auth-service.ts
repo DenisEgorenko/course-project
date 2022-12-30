@@ -103,8 +103,6 @@ export const authService = {
     async updateSecuritySession(userId: string, ip: string, title: string, deviceId: string) {
         const refreshToken = uuidv4()
 
-
-
         const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
 
         await securityDevicesRepositories.updateSession(deviceId)

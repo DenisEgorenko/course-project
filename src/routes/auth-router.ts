@@ -261,6 +261,8 @@ authRouter.post('/logout',
 
 
 authRouter.post('/refresh-token',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
     async (req: Request,
            res: Response
     ) => {
@@ -268,6 +270,7 @@ authRouter.post('/refresh-token',
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
         if (!accessData) {
+            console.log('Refresh token Error because no access data')
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
@@ -275,6 +278,8 @@ authRouter.post('/refresh-token',
         const sessionExist = await securityDevicesQueryRepositories.findActiveSessionByDeviceId(accessData.deviceId)
 
         if (!sessionExist.length) {
+            console.log('Refresh token Error because no session data')
+
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
@@ -282,6 +287,8 @@ authRouter.post('/refresh-token',
         const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
 
         if (accessData.refreshToken !== userAccessToken) {
+            console.log('Refresh token Error because ref token not equal to user ref token in db')
+
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
@@ -302,6 +309,8 @@ authRouter.post('/refresh-token',
                 }
             )
         } else {
+            console.log('Refresh token Error because ref token not generated')
+
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
