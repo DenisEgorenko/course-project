@@ -64,7 +64,7 @@ export const requestsAttemptsAuthorisationMiddleware = async (req: Request, res:
     urlData.attemptsCount += 1
 
     if (apiRequestsTime < limitSecondsRate && urlData.attemptsCount <= maxAttempts) {
-        return next()
+        next()
     } else {
         res.sendStatus(httpStatus.TOO_MANY_REQUESTS_429)
         return

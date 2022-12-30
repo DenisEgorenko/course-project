@@ -49,7 +49,8 @@ SecurityDevicesRouter.get('/devices',
 
 // Delete Comment
 SecurityDevicesRouter.delete('/devices/',
-    inputValidationMiddleware,
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
     async (req: RequestWithParams<commentsURImodel>, res: Response) => {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
@@ -74,7 +75,8 @@ SecurityDevicesRouter.delete('/devices/',
 
 
 SecurityDevicesRouter.delete('/devices/:deviceId',
-    inputValidationMiddleware,
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
     async (req: RequestWithParams<deleteSecurityDevicesURIModel>, res: Response) => {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
@@ -93,6 +95,7 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
 
         if(accessData.userId !== session.userId) {
             res.sendStatus(httpStatus.FORBIDDEN_403)
+            return
         }
 
         await authService.removeSecuritySession(accessData.deviceId)
