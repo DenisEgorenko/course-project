@@ -261,8 +261,6 @@ authRouter.post('/logout',
 
 
 authRouter.post('/refresh-token',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
     async (req: Request,
            res: Response
     ) => {
