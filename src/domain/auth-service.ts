@@ -127,6 +127,7 @@ export const authService = {
     },
 
     async logOutWithRefreshToken(accessData: accessDataType) {
+        await securityDevicesRepositories.removeSecuritySession(accessData.deviceId)
 
         return await usersRepositories.updateRefreshToken(accessData.userId, null)
     }

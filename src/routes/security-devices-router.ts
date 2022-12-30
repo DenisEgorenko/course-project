@@ -2,9 +2,8 @@ import {Request, Response, Router} from 'express';
 import {httpStatus} from '../types/responseTypes';
 import {RequestWithParams} from '../types/requestTypes';
 import {cookie} from 'express-validator';
-import {inputValidationMiddleware, inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
+import {inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
 import {commentsURImodel} from '../models/comments-models/commentsURImodel';
-import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {jwtService} from "../application/jwt-service";
 import {
     securityDevicesQueryRepositories,
@@ -13,7 +12,6 @@ import {
 import {authService} from "../domain/auth-service";
 import {accessDataType} from "../models/auth-models/assessDataType";
 import {deleteSecurityDevicesURIModel} from "../models/security-devices-models/deleteSecurityDevicesURImodel";
-import {securityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
 
 export const SecurityDevicesRouter = Router({})
 
@@ -86,7 +84,7 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
             return
         }
 
-        const session = await securityDevicesQueryRepositories.findUserIdForActiveSessionByDeviceId(req.params.deviceId)
+        const session = await securityDevicesQueryRepositories.findAllInfoForActiveSessionByDeviceId(req.params.deviceId)
 
         if (!session) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -98,7 +96,7 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
             return
         }
 
-        await authService.removeSecuritySession(accessData.deviceId)
+        await authService.removeSecuritySession(req.params.deviceId)
 
         res.sendStatus(httpStatus.NO_CONTENT_204)
         return

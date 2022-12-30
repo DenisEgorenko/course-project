@@ -11,7 +11,7 @@ export const securityDevicesQueryRepositories = {
         return sessionsToOutputModel(session)
     },
 
-    async findUserIdForActiveSessionByDeviceId(deviceId: string) {
+    async findAllInfoForActiveSessionByDeviceId(deviceId: string) {
         const session = await securityDevicesDatabase.find({deviceId: deviceId}).toArray()
         return session[0]
     },

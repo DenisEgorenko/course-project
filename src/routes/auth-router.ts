@@ -250,9 +250,6 @@ authRouter.post('/logout',
 
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
 
-        await authService.removeSecuritySession(accessData.deviceId)
-
-
         if (logoutResult) {
             res.clearCookie('refreshToken').sendStatus(httpStatus.NO_CONTENT_204)
             return
