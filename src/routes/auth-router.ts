@@ -241,14 +241,17 @@ authRouter.post('/logout',
             return
         }
 
-        const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
-
-        if (accessData.refreshToken !== userAccessToken) {
-            res.sendStatus(httpStatus.UNATHORIZED_401)
-            return
-        }
+        // const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
+        //
+        // if (accessData.refreshToken !== userAccessToken) {
+        //     res.sendStatus(httpStatus.UNATHORIZED_401)
+        //     return
+        // }
 
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
+
+        await authService.removeSecuritySession(accessData.deviceId)
+
 
         if (logoutResult) {
             res.clearCookie('refreshToken').sendStatus(httpStatus.NO_CONTENT_204)
@@ -284,14 +287,6 @@ authRouter.post('/refresh-token',
             return
         }
 
-        // const userRefreshToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
-        //
-        // if (accessData.refreshToken !== userRefreshToken) {
-        //     console.log('Refresh token Error because ref token not equal to user ref token in db')
-        //
-        //     res.sendStatus(httpStatus.UNATHORIZED_401)
-        //     return
-        // }
 
         const refreshToken = await authService.updateSecuritySession(
             accessData.userId,
