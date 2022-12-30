@@ -69,6 +69,7 @@ SecurityDevicesRouter.delete('/devices/',
         await authService.removeAllSecuritySessions(accessData.userId, accessData.deviceId)
 
         res.sendStatus(httpStatus.NO_CONTENT_204)
+        return
     })
 
 
@@ -97,6 +98,7 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
         await authService.removeSecuritySession(accessData.deviceId)
 
         res.sendStatus(httpStatus.NO_CONTENT_204)
+        return
     })
 
 
