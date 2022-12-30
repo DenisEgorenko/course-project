@@ -95,6 +95,8 @@ const cookieRefreshTokenValidation = cookie('refreshToken')
     .isJWT()
     .withMessage('RefreshToken doesnt exist')
 
+const mode: boolean = process.env.TEST_MODE !== 'true'
+
 authRouter.get('/me',
     bearerAuthorisationMiddleware,
     async (req: RequestWithBody<bearerAuthModel>, res: Response<ErrorType | authUserOutputModel>) => {
@@ -121,7 +123,6 @@ authRouter.post('/login',
            res: Response<ErrorType | { accessToken: string }>
     ) => {
         try {
-
             const userData = await usersQueryRepositories.getUserByEmailOrLogin(req.body.loginOrEmail)
 
             if (!userData) {
@@ -144,9 +145,13 @@ authRouter.post('/login',
                 req.headers['user-agent'] || 'undefined'
             )
 
+
             if (validPassword) {
                 res.status(httpStatus.OK_200)
-                res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: mode,
+                    secure: mode
+                })
                 res.json(
                     {
                         accessToken: await jwtService.createJwt(userData.accountData.id)
@@ -292,7 +297,7 @@ authRouter.post('/refresh-token',
 
         if (refreshToken) {
             res.status(httpStatus.OK_200)
-            res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
+            res.cookie('refreshToken', refreshToken, {httpOnly: mode, secure: mode})
             res.json(
                 {
                     accessToken: await jwtService.createJwt(accessData.userId)

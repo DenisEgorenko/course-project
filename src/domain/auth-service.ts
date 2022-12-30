@@ -107,7 +107,7 @@ export const authService = {
 
         const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
 
-        const saveSecurityDevices = await securityDevicesRepositories.updateSession(deviceId)
+        await securityDevicesRepositories.updateSession(deviceId)
 
         await usersRepositories.updateRefreshToken(userId, refreshToken)
 
