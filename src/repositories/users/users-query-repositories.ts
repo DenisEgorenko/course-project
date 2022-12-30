@@ -51,7 +51,7 @@ export const usersQueryRepositories = {
         return userToOutputModel(foundBlog[0])
     },
 
-    async getUserAccessTokenById(id: string) {
+    async getUserRefreshTokenById(id: string) {
         const foundBlog = await usersDatabase.find({'accountData.id': id}, {projection: {_id: 0}}).toArray()
         return foundBlog[0].accountData.refreshToken
     },

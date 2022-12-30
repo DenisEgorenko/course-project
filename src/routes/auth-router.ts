@@ -236,7 +236,7 @@ authRouter.post('/logout',
             return
         }
 
-        const userAccessToken = await usersQueryRepositories.getUserAccessTokenById(accessData.userId)
+        const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
 
         if (accessData.refreshToken !== userAccessToken) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
@@ -271,14 +271,12 @@ authRouter.post('/refresh-token',
 
         const sessionExist = await securityDevicesQueryRepositories.findActiveSessionByDeviceId(accessData.deviceId)
 
-        console.log(sessionExist)
-
         if (!sessionExist.length) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
 
-        const userAccessToken = await usersQueryRepositories.getUserAccessTokenById(accessData.userId)
+        const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
 
         if (accessData.refreshToken !== userAccessToken) {
             res.sendStatus(httpStatus.UNATHORIZED_401)

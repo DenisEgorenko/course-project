@@ -25,6 +25,8 @@ export const requestsAttemptsAuthorisationMiddleware = async (req: Request, res:
     const limitSecondsRate = 10
     const ipData = attemptsData.find(attempt => attempt.ip === req.ip)
 
+    console.log(req.ip)
+
     if (!ipData) {
         const newInfo: attemptType = {
             ip: req.ip,
