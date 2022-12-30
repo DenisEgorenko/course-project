@@ -146,7 +146,7 @@ authRouter.post('/login',
 
             if (validPassword) {
                 res.status(httpStatus.OK_200)
-                res.cookie('refreshToken', refreshToken, {httpOnly: false, secure: false})
+                res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
                 res.json(
                     {
                         accessToken: await jwtService.createJwt(userData.accountData.id)
@@ -294,7 +294,7 @@ authRouter.post('/refresh-token',
 
         if (refreshToken) {
             res.status(httpStatus.OK_200)
-            res.cookie('refreshToken', refreshToken, {httpOnly: false, secure: false})
+            res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
             res.json(
                 {
                     accessToken: await jwtService.createJwt(accessData.userId)

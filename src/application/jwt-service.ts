@@ -24,7 +24,7 @@ export const jwtService = {
             userId: userId,
             deviceId: deviceId,
             refreshToken: refreshToken
-        }, 'secret', {expiresIn: '20m'})
+        }, 'secret', {expiresIn: '20s'})
         return token
     },
 
