@@ -1,8 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {validationResult} from 'express-validator';
 import {httpStatus} from '../types/responseTypes';
-import {jwtService} from '../application/jwt-service';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import differenceInSeconds from "date-fns/differenceInSeconds";
 
 

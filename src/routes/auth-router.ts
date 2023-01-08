@@ -328,7 +328,6 @@ authRouter.post('/refresh-token',
 
 
 authRouter.post('/password-recovery',
-    requestsAttemptsAuthorisationMiddleware,
     userEmailValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<PasswordRecoveryInputModel>,
@@ -355,7 +354,6 @@ authRouter.post('/password-recovery',
     })
 
 authRouter.post('/new-password',
-    requestsAttemptsAuthorisationMiddleware,
     recoveryCodeValidation,
     userNewPasswordValidation,
     inputValidationMiddleware,
