@@ -44,6 +44,14 @@ const userNewPasswordValidation = body('newPassword')
     })
     .withMessage('Request should consist password with length more than 5 and less than 21')
 
+const recoveryCodeValidation = body('recoveryCode')
+    .trim()
+    .custom(async code => {
+        const user = await usersQueryRepositories.getUserByRecoveryCode(code)
+        if (!user) return Promise.reject()
+    })
+    .withMessage('Wrong recovery code')
+
 const userLoginValidation = body('login')
     .trim()
     .isLength({
@@ -348,6 +356,7 @@ authRouter.post('/password-recovery',
 
 authRouter.post('/new-password',
     requestsAttemptsAuthorisationMiddleware,
+    recoveryCodeValidation,
     userNewPasswordValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<NewPasswordInputModel>,
@@ -356,12 +365,7 @@ authRouter.post('/new-password',
 
         const user: userTypeDB = await usersQueryRepositories.getUserByRecoveryCode(req.body.recoveryCode)
 
-        if (!user) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return
-        }
-
-        // if (user.passwordRecovery.recoveryCode !== req.body.recoveryCode) {
+        // if (!user) {
         //     res.sendStatus(httpStatus.BAD_REQUEST_400)
         //     return
         // }
