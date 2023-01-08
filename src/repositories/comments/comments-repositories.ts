@@ -1,5 +1,4 @@
-import {commentsDatabase, commentsTypeDB, postsDatabase} from '../../database/dbInterface';
-import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
+import {Comment, commentsTypeDB} from '../../database/dbInterface';
 import {CommentFilterQuery, updateCommentQuery} from '../../domain/comments-service';
 
 
@@ -7,7 +6,8 @@ export const commentsRepositories = {
 
     async createNewComment(newComment: commentsTypeDB) {
         try {
-            await commentsDatabase.insertOne({...newComment})
+            const newCommentEntity = new Comment(newComment)
+            await newCommentEntity.save()
             return true
         } catch (e) {
             return false
@@ -15,7 +15,7 @@ export const commentsRepositories = {
     },
 
     async updateComment(filterQuery: CommentFilterQuery, updateQuery: updateCommentQuery) {
-        const result = await commentsDatabase.updateOne(
+        const result = await Comment.updateOne(
             filterQuery,
             updateQuery
         )
@@ -23,7 +23,7 @@ export const commentsRepositories = {
     },
 
     async deleteComment(filterQuery: CommentFilterQuery): Promise<boolean> {
-        const result = await commentsDatabase.deleteOne(filterQuery)
+        const result = await Comment.deleteOne(filterQuery)
         return result.deletedCount >= 1
     },
 

@@ -4,7 +4,7 @@ import {httpStatus} from '../src/types/responseTypes';
 import {CreateBlogInputModel} from '../src/models/blogs-models/CreateBlogInputModel';
 import {CreatePostInputModel} from '../src/models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../src/models/posts-models/UpdatePostInputModel';
-import {blogTypeDB, postsDatabase, postTypeDB} from '../src/database/dbInterface';
+import {blogTypeDB, Post, postTypeDB} from '../src/database/dbInterface';
 
 
 const authToken = 'YWRtaW46cXdlcnR5'
@@ -16,7 +16,7 @@ describe('Posts CRUD tests', function () {
     })
 
     it('DB should empty', async function () {
-        expect(await postsDatabase.find({}).toArray()).toEqual([])
+        expect(await Post.find({})).toEqual([])
     });
 
     // Create
@@ -350,7 +350,7 @@ describe('Posts CRUD tests', function () {
             .set('Authorization', `Basic ${authToken}`)
             .expect(httpStatus.NO_CONTENT_204)
 
-        const res = await postsDatabase.find({}).toArray()
+        const res = await Post.find({})
 
         expect(res.length).toBe(1)
     });

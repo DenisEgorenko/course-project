@@ -1,9 +1,4 @@
-import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
-import {commentsTypeDB, postsDatabase, postTypeDB} from '../database/dbInterface';
-import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
-import {postsRepositories} from '../repositories/posts/posts-repositories';
-import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
-import {BlogFilterQuery, updateBlogQuery} from './blogs-service';
+import {commentsTypeDB} from '../database/dbInterface';
 import {CreateCommentInputModel} from '../models/comments-models/CreateCommentInputModel';
 import {commentsRepositories} from '../repositories/comments/comments-repositories';
 import {authUserOutputModel} from '../repositories/users/users-query-repositories';

@@ -1,7 +1,7 @@
 import {createVideoInputModel} from '../../models/videos-models/CreateVideoInputModel';
 import {UpdateVideoInputModel} from '../../models/videos-models/UpdateVideoInputModel';
-import {videosDatabase, videoTypeDB} from '../../database/dbInterface';
-
+import {Video, videoTypeDB} from '../../database/dbInterface';
+import {v4 as uuidv4} from 'uuid';
 
 export const videosRepositories = {
 
@@ -9,7 +9,7 @@ export const videosRepositories = {
         const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
 
         const newVideo: videoTypeDB = {
-            id: +(new Date()),
+            id: uuidv4(),
             title: requestData.title,
             author: requestData.author,
             canBeDownloaded: false,
@@ -19,14 +19,16 @@ export const videosRepositories = {
             availableResolutions: requestData.availableResolutions
         }
 
-        await videosDatabase.insertOne({...newVideo})
+        const newVideoEntity = new Video(newVideo)
+
+        await newVideoEntity.save()
 
         return newVideo
     },
 
-    async updateVideo(id: number, updateData: UpdateVideoInputModel) {
+    async updateVideo(id: string, updateData: UpdateVideoInputModel) {
 
-        const result = await videosDatabase.updateOne(
+        const result = await Video.updateOne(
             {id: id},
             {
                 $set: {
@@ -41,8 +43,8 @@ export const videosRepositories = {
         return result.modifiedCount >= 1;
     },
 
-    async deleteVideo(id: number) {
-        const result = await videosDatabase.deleteOne({id: id})
+    async deleteVideo(id: string) {
+        const result = await Video.deleteOne({id: id})
         return result.deletedCount >= 1
     }
 

@@ -1,11 +1,4 @@
-import {
-    blogsDatabase,
-    blogTypeDB,
-    postsDatabase,
-    postTypeDB,
-    usersDatabase,
-    userTypeDB
-} from '../../database/dbInterface';
+import {User, userTypeDB} from '../../database/dbInterface';
 import {Sort, WithId} from 'mongodb';
 import {usersQueryModel} from '../../models/users-models/usersQueryModel';
 
@@ -38,28 +31,28 @@ export const usersQueryRepositories = {
 
         const skip: number = pageSize * (pageNumber - 1)
 
-        const totalCount = await usersDatabase.countDocuments(filter)
+        const totalCount = await User.countDocuments(filter)
         const pagesCount = Math.ceil(totalCount / pageSize)
 
-        const items = await usersDatabase.find(filter, {projection: {_id: 0}}).sort(sort).skip(skip).limit(pageSize).toArray();
+        const items = await User.find(filter).sort(sort).skip(skip).limit(pageSize)
 
         return usersToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
     },
 
     async getUserById(id: string) {
-        const foundBlog = await usersDatabase.find({'accountData.id': id}, {projection: {_id: 0}}).toArray()
+        const foundBlog = await User.find({'accountData.id': id}, {projection: {_id: 0}})
         return userToOutputModel(foundBlog[0])
     },
 
     async getUserRefreshTokenById(id: string) {
-        const foundBlog = await usersDatabase.find({'accountData.id': id}, {projection: {_id: 0}}).toArray()
+        const foundBlog = await User.find({'accountData.id': id}, {projection: {_id: 0}})
         return foundBlog[0].accountData.refreshToken
     },
 
     async getUserByIdAuth(id: string) {
-        const foundUser = await usersDatabase.find({
+        const foundUser = await User.find({
             'accountData.id': id
-        }, {projection: {_id: 0}}).toArray()
+        }, {projection: {_id: 0}})
 
         if (foundUser.length) {
             return userToAuthOutputModel(foundUser[0])
@@ -70,9 +63,8 @@ export const usersQueryRepositories = {
 
 
     async getUserByEmailOrLogin(login?: string, email?: string) {
-        const foundBlog = await usersDatabase.find(
-            {$or: [{'accountData.email': email ? email : login}, {'accountData.login': login ? login : email}]}, {projection: {_id: 0}}
-        ).toArray()
+        const foundBlog = await User.find(
+            {$or: [{'accountData.email': email ? email : login}, {'accountData.login': login ? login : email}]})
         return foundBlog[0]
     },
 
@@ -85,11 +77,18 @@ export const usersQueryRepositories = {
     // },
 
     async getUserByConfirmationCode(code: string) {
-        const foundBlog = await usersDatabase.find(
-            {'emailConfirmation.confirmationCode': code}, {projection: {_id: 0}}
-        ).toArray()
-        return foundBlog[0]
-    }
+        const foundUser = await User.find(
+            {'emailConfirmation.confirmationCode': code}
+        )
+        return foundUser[0]
+    },
+
+    async getUserByRecoveryCode(recoveryCode: string) {
+        const foundUser = await User.find(
+            {'passwordRecovery.recoveryCode': recoveryCode}
+        )
+        return foundUser[0]
+    },
 }
 
 export const usersToOutputModel = (pagesCount: number,

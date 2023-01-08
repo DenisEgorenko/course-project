@@ -1,18 +1,18 @@
-import {securityDevicesDatabase, securityDevicesTypeDB} from "../../database/dbInterface";
+import {securityDevice, securityDevicesTypeDB} from "../../database/dbInterface";
 
 export const securityDevicesQueryRepositories = {
     async getAllUserSessions(userId: string) {
-        const sessions = await securityDevicesDatabase.find({userId: userId}).toArray()
+        const sessions = await securityDevice.find({userId})
         return sessionsToOutputModel(sessions)
     },
 
     async findActiveSessionByDeviceId(deviceId: string) {
-        const session = await securityDevicesDatabase.find({deviceId: deviceId}).toArray()
+        const session = await securityDevice.find({deviceId})
         return sessionsToOutputModel(session)
     },
 
     async findAllInfoForActiveSessionByDeviceId(deviceId: string) {
-        const session = await securityDevicesDatabase.find({deviceId: deviceId}).toArray()
+        const session = await securityDevice.find({deviceId})
         return session[0]
     },
 }

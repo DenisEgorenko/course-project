@@ -1,4 +1,4 @@
-import {usersDatabase, userTypeDB} from '../../database/dbInterface';
+import {User, userTypeDB} from '../../database/dbInterface';
 import {UserFilterQuery} from '../../domain/users-service';
 
 
@@ -6,7 +6,8 @@ export const usersRepositories = {
 
     async createNewUser(newUser: userTypeDB) {
         try {
-            await usersDatabase.insertOne({...newUser})
+            const newUserEntity = new User(newUser)
+            await newUserEntity.save()
             return true
         } catch (e) {
             return false
@@ -14,12 +15,12 @@ export const usersRepositories = {
     },
 
     async deleteUser(filterQuery: UserFilterQuery): Promise<boolean> {
-        const result = await usersDatabase.deleteOne(filterQuery)
+        const result = await User.deleteOne(filterQuery)
         return result.deletedCount >= 1
     },
 
     async updateConfirmation(userId: string) {
-        const result = await usersDatabase.updateOne(
+        const result = await User.updateOne(
             {'accountData.id': userId},
             {$set: {'emailConfirmation.isConfirmed': true}}
         )
@@ -27,7 +28,7 @@ export const usersRepositories = {
     },
 
     async updateRefreshToken(userId: string, refreshToken: string | null) {
-        const result = await usersDatabase.updateOne(
+        const result = await User.updateOne(
             {'accountData.id': userId},
             {$set: {'accountData.refreshToken': refreshToken}}
         )
@@ -36,7 +37,7 @@ export const usersRepositories = {
 
 
     async changeConfirmationData(userId: string, newCode: string, newExpDate: Date) {
-        const result = await usersDatabase.updateOne(
+        const result = await User.updateOne(
             {'accountData.id': userId},
             {
                 $set: {
@@ -46,5 +47,33 @@ export const usersRepositories = {
             }
         )
         return result.modifiedCount >= 1;
-    }
+    },
+
+    async updatePasswordRecoveryData(userId: string, recoveryCode: string, expirationData: Date) {
+        const result = await User.updateOne(
+            {'accountData.id': userId},
+            {
+                $set: {
+                    'passwordRecovery.recoveryCode': recoveryCode,
+                    'passwordRecovery.expirationDate': expirationData
+                }
+            }
+        )
+        return result.modifiedCount >= 1;
+    },
+
+    async setNewPassword(userId: string, passwordSalt: string, passwordHash: string) {
+        const result = await User.updateOne(
+            {'accountData.id': userId},
+            {
+                $set: {
+                    'accountData.salt': passwordSalt,
+                    'accountData.password': passwordHash,
+                    'passwordRecovery.recoveryCode': null,
+                    'passwordRecovery.expirationDate': null
+                }
+            }
+        )
+        return result.modifiedCount >= 1;
+    },
 }

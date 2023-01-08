@@ -1,4 +1,4 @@
-import {blogsDatabase, blogTypeDB, postsDatabase, postTypeDB} from '../../database/dbInterface';
+import {Blog, Post, postTypeDB} from '../../database/dbInterface';
 import {Sort} from 'mongodb';
 import {postsQueryModel} from '../../models/posts-models/postsQueryModel';
 
@@ -15,23 +15,26 @@ export const postsQueryRepositories = {
 
         const skip: number = pageSize * (pageNumber - 1)
 
-        const totalCount = await postsDatabase.countDocuments({})
+        const totalCount = await Post.countDocuments({})
         const pagesCount = Math.ceil(totalCount / pageSize)
 
-        const items = await postsDatabase.find({}, {projection: {_id: 0}}).sort(sort).skip(skip).limit(pageSize).toArray();
+        const items = await Post.find({}).sort(sort).skip(skip).limit(pageSize);
 
         return postsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
     },
 
     async getPostById(id: string) {
-        const foundPost = await postsDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
-        return foundPost[0]
+        const foundPost = await Post.find({id})
+        if (foundPost[0]) {
+            return postToOutputModel(foundPost[0])
+        } else {
+            return undefined
+        }
     },
 
 
     async ifBlogIdExist(value: string): Promise<boolean> {
-
-        const blogs = await blogsDatabase.find({}).toArray();
+        const blogs = await Blog.find({});
         if (blogs.some(blog => (blog.id === value))) {
             return Promise.resolve(true)
         } else {
@@ -42,10 +45,10 @@ export const postsQueryRepositories = {
 }
 
 export const postsToOutputModel = (pagesCount: number,
-                            page: number,
-                            pageSize: number,
-                            totalCount: number,
-                            items: postTypeDB[]
+                                   page: number,
+                                   pageSize: number,
+                                   totalCount: number,
+                                   items: postTypeDB[]
 ): postsOutputModel => {
 
     return {
@@ -53,7 +56,19 @@ export const postsToOutputModel = (pagesCount: number,
         page: page,
         pageSize: pageSize,
         totalCount: totalCount,
-        items: items
+        items: items.map(item => postToOutputModel(item))
+    }
+}
+
+export const postToOutputModel = (post: postTypeDB): postTypeDB => {
+    return {
+        id: post.id,
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt
     }
 }
 

@@ -1,4 +1,4 @@
-import {Request, Response, Router} from 'express';
+import {Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {
     RequestWithBody,
@@ -10,15 +10,12 @@ import {
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {postsRepositories} from '../repositories/posts/posts-repositories';
 import {postsURImodel} from '../models/posts-models/postsURImodel';
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 import {postsOutputModel, postsQueryRepositories} from '../repositories/posts/posts-query-repositories';
-import {commentsTypeDB, postTypeDB} from '../database/dbInterface';
+import {postTypeDB} from '../database/dbInterface';
 import {postsService} from '../domain/posts-service';
-import {blogsService} from '../domain/blogs-service';
-import {blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
 import {postsQueryModel} from '../models/posts-models/postsQueryModel';
 import {commentsURImodel} from '../models/comments-models/commentsURImodel';
 import {
@@ -29,8 +26,6 @@ import {
 import {CommentsService} from '../domain/comments-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {CreateCommentInputModel} from '../models/comments-models/CreateCommentInputModel';
-import {usersService} from '../domain/users-service';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {commentsQueryModel} from '../models/comments-models/commentsQueryModel';
 
 export const postsRouter = Router({})

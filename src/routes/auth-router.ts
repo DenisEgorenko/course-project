@@ -1,4 +1,4 @@
-import {Response, Router} from 'express';
+import {Request, Response, Router} from 'express';
 import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody} from '../types/requestTypes';
 import {body, cookie} from 'express-validator';
@@ -12,11 +12,12 @@ import {authService} from '../domain/auth-service';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {CreateBlogInputModel} from '../models/auth-models/EmailConfirmationInputModel';
 import {resendInputModel} from '../models/auth-models/resendInputModel';
-import {Request} from 'express';
 import {accessDataType} from '../models/auth-models/assessDataType';
-import * as http from 'http';
 import {securityDevicesQueryRepositories} from "../repositories/securityDevices/security-devices-query-repositories";
 import {requestsAttemptsAuthorisationMiddleware} from "../middlewares/requests-attempts-middleware";
+import {PasswordRecoveryInputModel} from "../models/auth-models/passwordRecoveryInputModel";
+import {NewPasswordInputModel} from "../models/auth-models/newPasswordInputModel";
+import {userTypeDB} from "../database/dbInterface";
 
 export const authRouter = Router({})
 
@@ -28,6 +29,14 @@ const userLoginOrEmailValidation = body('loginOrEmail')
 
 
 const userPasswordValidation = body('password')
+    .trim()
+    .isLength({
+        min: 6,
+        max: 20
+    })
+    .withMessage('Request should consist password with length more than 5 and less than 21')
+
+const userNewPasswordValidation = body('newPassword')
     .trim()
     .isLength({
         min: 6,
@@ -307,4 +316,63 @@ authRouter.post('/refresh-token',
             return
         }
 
+    })
+
+
+authRouter.post('/password-recovery',
+    requestsAttemptsAuthorisationMiddleware,
+    userEmailValidation,
+    inputValidationMiddleware,
+    async (req: RequestWithBody<PasswordRecoveryInputModel>,
+           res: Response<ErrorType>
+    ) => {
+
+        const user = await usersQueryRepositories.getUserByEmailOrLogin(req.body.email)
+
+        if (!user) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        }
+
+        const result = await authService.passwordRecovery(user)
+
+        if (result) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
+
+    })
+
+authRouter.post('/new-password',
+    requestsAttemptsAuthorisationMiddleware,
+    userNewPasswordValidation,
+    inputValidationMiddleware,
+    async (req: RequestWithBody<NewPasswordInputModel>,
+           res: Response<ErrorType>
+    ) => {
+
+        const user: userTypeDB = await usersQueryRepositories.getUserByRecoveryCode(req.body.recoveryCode)
+
+        if (!user) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return
+        }
+
+        // if (user.passwordRecovery.recoveryCode !== req.body.recoveryCode) {
+        //     res.sendStatus(httpStatus.BAD_REQUEST_400)
+        //     return
+        // }
+
+        if (user.passwordRecovery.expirationDate && user.passwordRecovery.expirationDate < new Date()) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return
+        }
+
+        const result = await authService.setNewPassword(user.accountData.id, req.body.newPassword)
+
+        if (result) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
     })

@@ -1,13 +1,5 @@
-import {
-    blogsDatabase,
-    blogTypeDB, commentsDatabase, commentsTypeDB,
-    postsDatabase,
-    postTypeDB,
-    usersDatabase,
-    userTypeDB
-} from '../../database/dbInterface';
-import {Sort, WithId} from 'mongodb';
-import {usersQueryModel} from '../../models/users-models/usersQueryModel';
+import {Comment, commentsTypeDB} from '../../database/dbInterface';
+import {Sort} from 'mongodb';
 import {commentsQueryModel} from '../../models/comments-models/commentsQueryModel';
 
 
@@ -23,16 +15,16 @@ export const commentsQueryRepositories = {
 
         const skip: number = pageSize * (pageNumber - 1)
 
-        const totalCount = await commentsDatabase.countDocuments({postId:postId})
+        const totalCount = await Comment.countDocuments({postId: postId})
         const pagesCount = Math.ceil(totalCount / pageSize)
 
-        const items = await commentsDatabase.find({postId:postId}, {projection: {_id: 0}}).sort(sort).skip(skip).limit(pageSize).toArray();
+        const items = await Comment.find({postId: postId}).sort(sort).skip(skip).limit(pageSize);
 
         return commentsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
     },
 
     async getCommentById(id: string) {
-        const foundComment = await commentsDatabase.find({id: id}, {projection: {_id: 0}}).toArray()
+        const foundComment = await Comment.find({id: id})
 
         if (foundComment.length) {
             return commentToOutputModel(foundComment[0])
@@ -54,13 +46,7 @@ export const commentsToOutputModel = (pagesCount: number,
         page: page,
         pageSize: pageSize,
         totalCount: totalCount,
-        items: items.map(user => ({
-            id: user.id,
-            content: user.content,
-            userId: user.userId,
-            userLogin: user.userLogin,
-            createdAt: user.createdAt
-        }))
+        items: items.map(comment => commentToOutputModel(comment))
     }
 }
 

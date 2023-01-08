@@ -1,10 +1,6 @@
-import {blogsDatabase, blogTypeDB, userTypeDB} from '../database/dbInterface';
-import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
-import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
+import {userTypeDB} from '../database/dbInterface';
 import {usersRepositories} from '../repositories/users/users-repositories';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
-import bcrypt from 'bcrypt'
 import {authInputModel} from '../models/auth-models/authInputModel';
 import {passwordService} from '../application/password-service';
 
@@ -40,8 +36,12 @@ export const usersService = {
             },
             emailConfirmation: {
                 confirmationCode: null,
-                expirationDate: new Date(),
+                expirationDate: null,
                 isConfirmed: true
+            },
+            passwordRecovery: {
+                recoveryCode: null,
+                expirationDate: null,
             }
         }
 

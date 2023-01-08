@@ -1,13 +1,12 @@
-import {securityDevicesDatabase, securityDevicesTypeDB, usersDatabase, userTypeDB} from '../../database/dbInterface';
-import {UserFilterQuery} from '../../domain/users-service';
-import {securityDevicesQueryRepositories} from "./security-devices-query-repositories";
+import {securityDevice, securityDevicesTypeDB} from '../../database/dbInterface';
 
 
 export const securityDevicesRepositories = {
 
     async createNewSession(newSession: securityDevicesTypeDB) {
         try {
-            await securityDevicesDatabase.insertOne({...newSession})
+            const securityDeviceEntity = new securityDevice(newSession)
+            await securityDeviceEntity.save()
             return true
         } catch (e) {
             return false
@@ -16,7 +15,7 @@ export const securityDevicesRepositories = {
 
     async updateSession(deviceId: string) {
         try {
-            await securityDevicesDatabase.updateOne({deviceId: deviceId}, {$set: {lastActiveDate: new Date()}})
+            await securityDevice.updateOne({deviceId: deviceId}, {$set: {lastActiveDate: new Date()}})
             return true
         } catch (e) {
             return false
@@ -26,7 +25,7 @@ export const securityDevicesRepositories = {
 
     async removeAllSecuritySessions(userId: string, deviceId: string) {
         try {
-            await securityDevicesDatabase.deleteMany({userId: userId, deviceId: {$ne: deviceId}})
+            await securityDevice.deleteMany({userId: userId, deviceId: {$ne: deviceId}})
             return true
         } catch (e) {
             return false
@@ -35,7 +34,7 @@ export const securityDevicesRepositories = {
 
     async removeSecuritySession(deviceId: string) {
         try {
-            await securityDevicesDatabase.deleteOne({deviceId: deviceId})
+            await securityDevice.deleteOne({deviceId: deviceId})
             return true
         } catch (e) {
             return false

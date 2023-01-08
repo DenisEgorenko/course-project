@@ -8,7 +8,6 @@ import {EmailManager} from '../managers/email-manager';
 import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {jwtService} from '../application/jwt-service';
 import {accessDataType} from '../models/auth-models/assessDataType';
-import {usersService} from './users-service';
 import {securityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
 
 export const authService = {
@@ -33,6 +32,10 @@ export const authService = {
                     hours: 1
                 }),
                 isConfirmed: false
+            },
+            passwordRecovery: {
+                recoveryCode: null,
+                expirationDate: null,
             }
         }
 
@@ -52,7 +55,7 @@ export const authService = {
         if (!user) return false
         if (user.emailConfirmation.isConfirmed) return false
         if (user.emailConfirmation.confirmationCode !== code) return false
-        if (user.emailConfirmation.expirationDate < new Date()) return false
+        if (user.emailConfirmation.expirationDate && user.emailConfirmation.expirationDate < new Date()) return false
         let result = await usersRepositories.updateConfirmation(user.accountData.id)
         return result
     },
@@ -130,5 +133,27 @@ export const authService = {
         await securityDevicesRepositories.removeSecuritySession(accessData.deviceId)
 
         return await usersRepositories.updateRefreshToken(accessData.userId, null)
-    }
+    },
+
+    async passwordRecovery(user: userTypeDB) {
+
+        const recoveryCode = uuidv4()
+        const expirationDate = add(new Date(), {
+            hours: 1
+        })
+
+        await EmailManager.sendPasswordRecoveryEmail(user.accountData.email, recoveryCode)
+
+        await usersRepositories.updatePasswordRecoveryData(user.accountData.id, recoveryCode, expirationDate)
+
+        return true
+    },
+
+    async setNewPassword(userId: string, newPassword: string) {
+
+        const passwordSalt = await passwordService.generateSalt()
+        const passwordHash = await passwordService.generateHash(newPassword, passwordSalt)
+
+        return await usersRepositories.setNewPassword(userId, passwordSalt, passwordHash)
+    },
 }

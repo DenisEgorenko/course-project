@@ -1,6 +1,4 @@
-import {CreatePostInputModel} from '../../models/posts-models/CreatePostInputModel';
-import {UpdatePostInputModel} from '../../models/posts-models/UpdatePostInputModel';
-import {blogsDatabase, postsDatabase, postTypeDB} from '../../database/dbInterface';
+import {Post, postTypeDB} from '../../database/dbInterface';
 import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
 
 
@@ -8,7 +6,8 @@ export const postsRepositories = {
 
     async createNewPost(newPost: postTypeDB) {
         try {
-            await postsDatabase.insertOne({...newPost})
+            const newPostEntity = new Post(newPost)
+            await newPostEntity.save()
             return true
         } catch (e) {
             return false
@@ -16,7 +15,7 @@ export const postsRepositories = {
     },
 
     async updatePost(filterQuery: PostFilterQuery, updateQuery: updatePostQuery) {
-        const result = await postsDatabase.updateOne(
+        const result = await Post.updateOne(
             filterQuery,
             updateQuery
         )
@@ -24,7 +23,7 @@ export const postsRepositories = {
     },
 
     async deletePost(filterQuery: PostFilterQuery): Promise<boolean> {
-        const result = await postsDatabase.deleteOne(filterQuery)
+        const result = await Post.deleteOne(filterQuery)
         return result.deletedCount >= 1
     },
 

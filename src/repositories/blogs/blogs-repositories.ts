@@ -1,6 +1,4 @@
-import {UpdateBlogInputModel} from '../../models/blogs-models/UpdateBlogInputModel';
-import {CreateBlogInputModel} from '../../models/blogs-models/CreateBlogInputModel';
-import {blogsDatabase, blogTypeDB} from '../../database/dbInterface';
+import {Blog, blogTypeDB} from '../../database/dbInterface';
 import {BlogFilterQuery, updateBlogQuery} from '../../domain/blogs-service';
 
 
@@ -8,8 +6,9 @@ export const blogsRepositories = {
 
     async createNewBlog(newBlog: blogTypeDB) {
 
+        const newBlogModel = new Blog(newBlog)
         try {
-            await blogsDatabase.insertOne({...newBlog})
+            await newBlogModel.save()
             return true
         } catch (e) {
             return false
@@ -17,7 +16,7 @@ export const blogsRepositories = {
     },
 
     async updateBlog(filterQuery: BlogFilterQuery, updateQuery: updateBlogQuery): Promise<boolean> {
-        const result = await blogsDatabase.updateOne(
+        const result = await Blog.updateOne(
             filterQuery,
             updateQuery
         )
@@ -26,7 +25,7 @@ export const blogsRepositories = {
     },
 
     async deleteBlog(filter: BlogFilterQuery) {
-        const result = await blogsDatabase.deleteOne(filter)
+        const result = await Blog.deleteOne(filter)
         return result.deletedCount >= 1
     }
 

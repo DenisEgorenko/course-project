@@ -4,7 +4,7 @@ import {createVideoInputModel} from '../src/models/videos-models/CreateVideoInpu
 import {httpStatus} from '../src/types/responseTypes';
 import {UpdateVideoInputModel} from '../src/models/videos-models/UpdateVideoInputModel';
 import {resolutions} from '../src/models/videos-models/resolutionsModel';
-import {videosDatabase, videoTypeDB} from '../src/database/dbInterface';
+import {Video, videoTypeDB} from '../src/database/dbInterface';
 
 
 describe('Video CRUD tests', function () {
@@ -14,7 +14,7 @@ describe('Video CRUD tests', function () {
     })
 
     it('DB should empty', async function () {
-        expect(await videosDatabase.find({}).toArray()).toEqual([])
+        expect(await Video.find({})).toEqual([])
     });
 
     // Create
@@ -48,7 +48,7 @@ describe('Video CRUD tests', function () {
 
         expect(response.body).toEqual(
             {
-                id: expect.any(Number),
+                id: expect.any(String),
                 title: newVideo.title,
                 author: newVideo.author,
                 canBeDownloaded: false,
@@ -329,7 +329,7 @@ describe('Video CRUD tests', function () {
             .delete(`/videos/${createdVideo1.id}`)
             .expect(httpStatus.NO_CONTENT_204)
 
-        const res = await videosDatabase.find({}).toArray()
+        const res = await Video.find({})
         expect(res.length).toBe(1)
     });
 

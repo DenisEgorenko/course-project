@@ -4,7 +4,7 @@ import {videosRouter} from './routes/videos-router';
 import {blogsRouter} from './routes/blogs-router';
 import {postsRouter} from './routes/posts-router';
 import {runDb} from './database/db';
-import {blogsDatabase, commentsDatabase, postsDatabase, usersDatabase, videosDatabase} from './database/dbInterface';
+import {Blog, Comment, Post, User, Video} from './database/dbInterface';
 import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
 import {CommentsRouter} from './routes/comments-router';
@@ -32,11 +32,11 @@ app.use('/security', SecurityDevicesRouter)
 // Testing method
 
 app.delete('/testing/all-data', async (req: Request, res: Response) => {
-    await videosDatabase.deleteMany({})
-    await postsDatabase.deleteMany({})
-    await blogsDatabase.deleteMany({})
-    await usersDatabase.deleteMany({})
-    await commentsDatabase.deleteMany({})
+    await Video.deleteMany({})
+    await Post.deleteMany({})
+    await Blog.deleteMany({})
+    await User.deleteMany({})
+    await Comment.deleteMany({})
 
     res.sendStatus(httpStatus.NO_CONTENT_204)
 })
