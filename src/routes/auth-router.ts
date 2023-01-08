@@ -328,6 +328,7 @@ authRouter.post('/refresh-token',
 
 
 authRouter.post('/password-recovery',
+    requestsAttemptsAuthorisationMiddleware,
     userEmailValidation,
     inputValidationMiddleware,
     async (req: RequestWithBody<PasswordRecoveryInputModel>,
@@ -354,6 +355,7 @@ authRouter.post('/password-recovery',
     })
 
 authRouter.post('/new-password',
+    requestsAttemptsAuthorisationMiddleware,
     recoveryCodeValidation,
     userNewPasswordValidation,
     inputValidationMiddleware,
@@ -362,11 +364,6 @@ authRouter.post('/new-password',
     ) => {
 
         const user: userTypeDB = await usersQueryRepositories.getUserByRecoveryCode(req.body.recoveryCode)
-
-        // if (!user) {
-        //     res.sendStatus(httpStatus.BAD_REQUEST_400)
-        //     return
-        // }
 
         if (user.passwordRecovery.expirationDate && user.passwordRecovery.expirationDate < new Date()) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
