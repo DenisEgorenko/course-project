@@ -331,14 +331,17 @@ authRouter.post('/password-recovery',
 
         if (!user) {
             res.sendStatus(httpStatus.NO_CONTENT_204)
+            return
         }
 
         const result = await authService.passwordRecovery(user)
 
         if (result) {
             res.sendStatus(httpStatus.NO_CONTENT_204)
+            return
         } else {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return
         }
 
     })
