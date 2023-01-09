@@ -8,16 +8,16 @@ export const videosRepositories = {
     async createNewVideo(requestData: createVideoInputModel) {
         const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
 
-        const newVideo: videoTypeDB = {
-            id: uuidv4(),
-            title: requestData.title,
-            author: requestData.author,
-            canBeDownloaded: false,
-            minAgeRestriction: null,
-            createdAt: new Date().toISOString(),
-            publicationDate: publicationDate,
-            availableResolutions: requestData.availableResolutions
-        }
+        const newVideo: videoTypeDB = new videoTypeDB(
+            uuidv4(),
+            requestData.title,
+            requestData.author,
+            false,
+            null,
+            new Date().toISOString(),
+            publicationDate,
+            requestData.availableResolutions
+        )
 
         const newVideoEntity = new Video(newVideo)
 

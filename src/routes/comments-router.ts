@@ -6,7 +6,7 @@ import {inputValidationMiddleware} from '../middlewares/input-validation-middlew
 import {postsURImodel} from '../models/posts-models/postsURImodel';
 import {commentsURImodel} from '../models/comments-models/commentsURImodel';
 import {commentOutputModel, commentsQueryRepositories} from '../repositories/comments/comments-query-repositories';
-import {CommentsService} from '../domain/comments-service';
+import {commentsService} from '../domain/comments-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {UpdateCommentInputModel} from '../models/comments-models/UpdateCommentInputModel';
 
@@ -18,28 +18,24 @@ export const commentContentValidation = body('content').trim().isLength({
     max: 300
 }).withMessage('Request should consist comment content with length more than 20 less than 301')
 
-// Comments
-// Read Comments
 
-CommentsRouter.get('/:id', async (req: RequestWithParams<postsURImodel>, res: Response<commentOutputModel>) => {
+// Controller
 
-    const foundComment = await commentsQueryRepositories.getCommentById(req.params.id)
+class CommentsController {
+    async getCommentById(req: RequestWithParams<postsURImodel>, res: Response<commentOutputModel>) {
 
-    if (!foundComment) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
+        const foundComment = await commentsQueryRepositories.getCommentById(req.params.id)
+
+        if (!foundComment) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
+
+        res.status(httpStatus.OK_200)
+        res.json(foundComment)
     }
 
-    res.status(httpStatus.OK_200)
-    res.json(foundComment)
-})
-
-// Update Comment
-CommentsRouter.put('/:postId',
-    bearerAuthorisationMiddleware,
-    commentContentValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<commentsURImodel, UpdateCommentInputModel>, res: Response<ErrorType>) => {
+    async updateComment(req: RequestWithParamsAndBody<commentsURImodel, UpdateCommentInputModel>, res: Response<ErrorType>) {
 
         if (!req.params.postId) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
@@ -59,19 +55,15 @@ CommentsRouter.put('/:postId',
             return
         }
 
-        if (!await CommentsService.updateComment(req.params.postId, req.body)) {
+        if (!await commentsService.updateComment(req.params.postId, req.body)) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
             return;
         } else {
             res.sendStatus(httpStatus.NO_CONTENT_204)
         }
-    })
+    }
 
-// Delete Comment
-CommentsRouter.delete('/:postId',
-    bearerAuthorisationMiddleware,
-    inputValidationMiddleware,
-    async (req: RequestWithParams<commentsURImodel>, res: Response) => {
+    async deleteComment(req: RequestWithParams<commentsURImodel>, res: Response) {
 
         if (!req.params.postId) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
@@ -92,8 +84,7 @@ CommentsRouter.delete('/:postId',
         }
 
 
-
-        const deleteVideo = await CommentsService.deleteComment(req.params.postId)
+        const deleteVideo = await commentsService.deleteComment(req.params.postId)
 
         if (!deleteVideo) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -102,5 +93,29 @@ CommentsRouter.delete('/:postId',
             res.sendStatus(httpStatus.NO_CONTENT_204)
         }
 
-    })
+    }
+}
+
+const commentsControllerInstance = new CommentsController()
+
+
+// Router
+// Read Comments
+
+CommentsRouter.get('/:id', commentsControllerInstance.getCommentById)
+
+// Update Comment
+CommentsRouter.put('/:postId',
+    bearerAuthorisationMiddleware,
+    commentContentValidation,
+    inputValidationMiddleware,
+    commentsControllerInstance.updateComment
+)
+
+// Delete Comment
+CommentsRouter.delete('/:postId',
+    bearerAuthorisationMiddleware,
+    inputValidationMiddleware,
+    commentsControllerInstance.deleteComment
+)
 

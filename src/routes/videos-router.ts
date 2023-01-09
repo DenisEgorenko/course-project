@@ -13,7 +13,6 @@ import {videoTypeDB} from '../database/dbInterface';
 
 export const videosRouter = Router({})
 
-
 const titleValidation = body('title').isLength({
     min: 1,
     max: 40
@@ -44,39 +43,76 @@ const availableResolutionsValidationRequired = body('availableResolutions').isAr
 const publicationDateValidation = body('publicationDate').optional().isString().isISO8601().withMessage('Invalid availableResolutions')
 
 
+// Controller
 
-
-videosRouter.get('/', async (req: Request, res: Response<Array<videoTypeDB>>) => {
-    res.status(httpStatus.OK_200)
-    res.json(await videosQueryRepositories.getAllVideos())
-})
-
-videosRouter.get('/:id', async (req: RequestWithParams<videoURImodel>, res: Response<videoTypeDB>) => {
-
-    const foundVideos = await videosQueryRepositories.getVideoById(req.params.id)
-
-    if (!foundVideos) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
+class VideosController {
+    async getAllVideos(req: Request, res: Response<Array<videoTypeDB>>) {
+        res.status(httpStatus.OK_200)
+        res.json(await videosQueryRepositories.getAllVideos())
     }
 
-    res.status(httpStatus.OK_200)
-    res.json(foundVideos)
-})
+    async getVideoById(req: RequestWithParams<videoURImodel>, res: Response<videoTypeDB>) {
 
-// Create videos
+        const foundVideos = await videosQueryRepositories.getVideoById(req.params.id)
+
+        if (!foundVideos) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
+
+        res.status(httpStatus.OK_200)
+        res.json(foundVideos)
+    }
+
+    async createVideo(req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoTypeDB>) {
+        res.status(httpStatus.CREATED_201)
+        res.json(await videosRepositories.createNewVideo(req.body))
+    }
+
+    async updateVideo(req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) {
+
+        if (!await videosRepositories.updateVideo(req.params.id, req.body)) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return;
+        } else {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        }
+    }
+
+    async deleteVideo(req: RequestWithParams<videoURImodel>, res: Response) {
+
+        if (!req.params.id) {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return;
+        }
+
+        const deleteVideo = await videosRepositories.deleteVideo(req.params.id)
+
+        if (!deleteVideo) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        } else {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        }
+
+    }
+}
+
+const videosControllerInstance = new VideosController()
+
+// Routes
+videosRouter.get('/', videosControllerInstance.getAllVideos)
+
+videosRouter.get('/:id', videosControllerInstance.getVideoById)
+
 videosRouter.post('/',
     titleValidation,
     authorValidation,
     availableResolutionsValidationRequired,
     inputValidationMiddleware,
-    async (req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoTypeDB>) => {
+    videosControllerInstance.createVideo
+)
 
-        res.status(httpStatus.CREATED_201)
-        res.json(await videosRepositories.createNewVideo(req.body))
-    })
-
-// Update Videos
 videosRouter.put('/:id',
     titleValidation,
     authorValidation,
@@ -85,32 +121,8 @@ videosRouter.put('/:id',
     availableResolutionsValidation,
     publicationDateValidation,
     inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) => {
-
-        if (!await videosRepositories.updateVideo(req.params.id, req.body)) {
-            res.sendStatus(httpStatus.NOT_FOUND_404)
-            return;
-        } else {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
-        }
-    })
+    videosControllerInstance.updateVideo
+)
 
 // Delete Videos
-videosRouter.delete('/:id',
-    async (req: RequestWithParams<videoURImodel>, res: Response) => {
-
-    if (!req.params.id) {
-        res.sendStatus(httpStatus.BAD_REQUEST_400)
-        return;
-    }
-
-    const deleteVideo = await videosRepositories.deleteVideo(req.params.id)
-
-    if (!deleteVideo) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
-    } else {
-        res.sendStatus(httpStatus.NO_CONTENT_204)
-    }
-
-})
+videosRouter.delete('/:id', videosControllerInstance.deleteVideo)

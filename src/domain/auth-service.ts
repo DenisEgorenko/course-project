@@ -10,14 +10,15 @@ import {jwtService} from '../application/jwt-service';
 import {accessDataType} from '../models/auth-models/assessDataType';
 import {securityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
 
-export const authService = {
+
+class AuthService {
     async createUser(userData: CreateUserInputModel) {
 
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
 
-        const newUser: userTypeDB = {
-            accountData: {
+        const newUser: userTypeDB = new userTypeDB(
+            {
                 id: uuidv4(),
                 login: userData.login,
                 email: userData.email,
@@ -26,18 +27,18 @@ export const authService = {
                 refreshToken: null,
                 createdAt: new Date()
             },
-            emailConfirmation: {
+            {
                 confirmationCode: uuidv4(),
                 expirationDate: add(new Date(), {
                     hours: 1
                 }),
                 isConfirmed: false
             },
-            passwordRecovery: {
+            {
                 recoveryCode: null,
                 expirationDate: null,
             }
-        }
+        )
 
         const userCreateRes = await usersRepositories.createNewUser(newUser)
 
@@ -48,7 +49,7 @@ export const authService = {
         }
 
         return userCreateRes
-    },
+    }
 
     async confirmEmail(code: string) {
         let user = await usersQueryRepositories.getUserByConfirmationCode(code)
@@ -58,7 +59,7 @@ export const authService = {
         if (user.emailConfirmation.expirationDate && user.emailConfirmation.expirationDate < new Date()) return false
         let result = await usersRepositories.updateConfirmation(user.accountData.id)
         return result
-    },
+    }
 
     async resendConfirmEmail(email: string) {
         let user = await usersQueryRepositories.getUserByEmailOrLogin(email)
@@ -80,28 +81,27 @@ export const authService = {
         }
 
         return false
-    },
-
+    }
 
     async createSecuritySession(userId: string, ip: string, title: string) {
         const refreshToken = uuidv4()
         const deviceId = uuidv4()
         const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
 
-        const newSession: securityDevicesTypeDB = {
+        const newSession: securityDevicesTypeDB = new securityDevicesTypeDB(
             ip,
             title,
-            lastActiveDate: new Date(),
+            new Date(),
             deviceId,
             userId
-        }
+        )
 
-        const saveSecurityDevices = await securityDevicesRepositories.createNewSession(newSession)
+        await securityDevicesRepositories.createNewSession(newSession)
 
         await usersRepositories.updateRefreshToken(userId, refreshToken)
 
         return jwtToken
-    },
+    }
 
     async updateSecuritySession(userId: string, ip: string, title: string, deviceId: string) {
         const refreshToken = uuidv4()
@@ -113,27 +113,27 @@ export const authService = {
         await usersRepositories.updateRefreshToken(userId, refreshToken)
 
         return jwtToken
-    },
+    }
 
     async removeAllSecuritySessions(userId: string, deviceId: string) {
 
         await securityDevicesRepositories.removeAllSecuritySessions(userId, deviceId)
 
         return true
-    },
+    }
 
     async removeSecuritySession(deviceId: string) {
 
         await securityDevicesRepositories.removeSecuritySession(deviceId)
 
         return true
-    },
+    }
 
     async logOutWithRefreshToken(accessData: accessDataType) {
         await securityDevicesRepositories.removeSecuritySession(accessData.deviceId)
 
         return await usersRepositories.updateRefreshToken(accessData.userId, null)
-    },
+    }
 
     async passwordRecovery(user: userTypeDB) {
 
@@ -147,7 +147,7 @@ export const authService = {
         await usersRepositories.updatePasswordRecoveryData(user.accountData.id, recoveryCode, expirationDate)
 
         return true
-    },
+    }
 
     async setNewPassword(userId: string, newPassword: string) {
 
@@ -155,5 +155,7 @@ export const authService = {
         const passwordHash = await passwordService.generateHash(newPassword, passwordSalt)
 
         return await usersRepositories.setNewPassword(userId, passwordSalt, passwordHash)
-    },
+    }
 }
+
+export const authService = new AuthService()

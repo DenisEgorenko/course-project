@@ -3,7 +3,7 @@ import {ErrorType, httpStatus} from '../types/responseTypes';
 import {RequestWithBody} from '../types/requestTypes';
 import {body, cookie} from 'express-validator';
 import {inputValidationMiddleware, inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
-import {authInputModel, bearerAuthModel} from '../models/auth-models/authInputModel';
+import {authInputModel} from '../models/auth-models/authInputModel';
 import {authUserOutputModel, usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {usersService} from '../domain/users-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
@@ -21,12 +21,10 @@ import {userTypeDB} from "../database/dbInterface";
 
 export const authRouter = Router({})
 
-
 const userLoginOrEmailValidation = body('loginOrEmail')
     .trim()
     .matches(`^([\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}|[a-zA-Z0-9_-]*)$`)
     .withMessage('Request should consist valid LoginOrEmail')
-
 
 const userPasswordValidation = body('password')
     .trim()
@@ -114,10 +112,11 @@ const cookieRefreshTokenValidation = cookie('refreshToken')
 
 const mode: boolean = process.env.TEST_MODE !== 'true'
 
-authRouter.get('/me',
-    bearerAuthorisationMiddleware,
-    async (req: RequestWithBody<bearerAuthModel>, res: Response<ErrorType | authUserOutputModel>) => {
 
+// Controller
+
+class AuthController {
+    async authMe(req: Request, res: Response<ErrorType | authUserOutputModel>) {
         // @ts-ignore
         if (req.user) {
             res.status(httpStatus.OK_200)
@@ -125,44 +124,26 @@ authRouter.get('/me',
             res.json(req.user)
             return
         }
-
         res.sendStatus(httpStatus.UNATHORIZED_401)
-    })
+    }
 
-
-// Login
-authRouter.post('/login',
-    requestsAttemptsAuthorisationMiddleware,
-    userPasswordValidation,
-    userLoginOrEmailValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<authInputModel>,
-           res: Response<ErrorType | { accessToken: string }>
-    ) => {
+    async login(req: RequestWithBody<authInputModel>, res: Response<ErrorType | { accessToken: string }>) {
         try {
             const userData = await usersQueryRepositories.getUserByEmailOrLogin(req.body.loginOrEmail)
-
             if (!userData) {
                 res.sendStatus(httpStatus.UNATHORIZED_401)
                 return
             }
-
             if (!userData.emailConfirmation.isConfirmed) {
                 res.sendStatus(httpStatus.UNATHORIZED_401)
                 return
             }
-
             const validPassword = await usersService.checkCredentials(userData, req.body)
-
-            // const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'][0] : req.socket.remoteAddress || 'undefined'
-
             const refreshToken = await authService.createSecuritySession(
                 userData.accountData.id,
                 req.ip,
                 req.headers['user-agent'] || 'undefined'
             )
-
-
             if (validPassword) {
                 res.status(httpStatus.OK_200)
                 res.cookie('refreshToken', refreshToken, {
@@ -181,20 +162,9 @@ authRouter.post('/login',
         } catch (e) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
         }
-    })
+    }
 
-
-authRouter.post('/registration',
-    requestsAttemptsAuthorisationMiddleware,
-    userPasswordValidation,
-    userLoginValidation,
-    userLoginExistValidation,
-    userEmailValidation,
-    userEmailExistValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<CreateUserInputModel>,
-           res: Response<ErrorType>
-    ) => {
+    async registration(req: RequestWithBody<CreateUserInputModel>, res: Response<ErrorType>) {
         const user = await authService.createUser(req.body)
         if (user) {
             res.sendStatus(httpStatus.NO_CONTENT_204)
@@ -203,16 +173,9 @@ authRouter.post('/registration',
             res.sendStatus(httpStatus.BAD_REQUEST_400)
             return
         }
-    })
+    }
 
-
-authRouter.post('/registration-confirmation',
-    requestsAttemptsAuthorisationMiddleware,
-    codeConfirmedValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<CreateBlogInputModel>,
-           res: Response<ErrorType>
-    ) => {
+    async registrationConfirmation(req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType>) {
         const result = await authService.confirmEmail(req.body.code)
 
         if (result) {
@@ -220,19 +183,9 @@ authRouter.post('/registration-confirmation',
         } else {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
+    }
 
-    })
-
-
-authRouter.post('/registration-email-resending',
-    requestsAttemptsAuthorisationMiddleware,
-    userEmailValidation,
-    emailDoesntValidation,
-    emailConfirmedValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<resendInputModel>,
-           res: Response<ErrorType>
-    ) => {
+    async registrationEmailResending(req: RequestWithBody<resendInputModel>, res: Response<ErrorType>) {
 
         const result = await authService.resendConfirmEmail(req.body.email)
 
@@ -242,28 +195,15 @@ authRouter.post('/registration-email-resending',
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
 
-    })
+    }
 
-
-authRouter.post('/logout',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
-    async (req: Request,
-           res: Response<ErrorType>
-    ) => {
+    async logout(req: Request, res: Response<ErrorType>) {
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
         if (!accessData) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
-
-        // const userAccessToken = await usersQueryRepositories.getUserRefreshTokenById(accessData.userId)
-        //
-        // if (accessData.refreshToken !== userAccessToken) {
-        //     res.sendStatus(httpStatus.UNATHORIZED_401)
-        //     return
-        // }
 
         const logoutResult = await authService.logOutWithRefreshToken(accessData)
 
@@ -274,15 +214,9 @@ authRouter.post('/logout',
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
-    })
+    }
 
-
-authRouter.post('/refresh-token',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
-    async (req: Request,
-           res: Response
-    ) => {
+    async refreshToken(req: Request, res: Response) {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
@@ -300,7 +234,6 @@ authRouter.post('/refresh-token',
             res.sendStatus(httpStatus.UNATHORIZED_401)
             return
         }
-
 
         const refreshToken = await authService.updateSecuritySession(
             accessData.userId,
@@ -324,16 +257,9 @@ authRouter.post('/refresh-token',
             return
         }
 
-    })
+    }
 
-
-authRouter.post('/password-recovery',
-    requestsAttemptsAuthorisationMiddleware,
-    userEmailValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<PasswordRecoveryInputModel>,
-           res: Response<ErrorType>
-    ) => {
+    async passwordRecovery(req: RequestWithBody<PasswordRecoveryInputModel>, res: Response<ErrorType>) {
 
         const user = await usersQueryRepositories.getUserByEmailOrLogin(req.body.email)
 
@@ -352,16 +278,9 @@ authRouter.post('/password-recovery',
             return
         }
 
-    })
+    }
 
-authRouter.post('/new-password',
-    requestsAttemptsAuthorisationMiddleware,
-    recoveryCodeValidation,
-    userNewPasswordValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<NewPasswordInputModel>,
-           res: Response<ErrorType>
-    ) => {
+    async newPassword(req: RequestWithBody<NewPasswordInputModel>, res: Response<ErrorType>) {
 
         const user: userTypeDB = await usersQueryRepositories.getUserByRecoveryCode(req.body.recoveryCode)
 
@@ -377,4 +296,77 @@ authRouter.post('/new-password',
         } else {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
-    })
+    }
+}
+
+const authControllerInstance = new AuthController()
+
+
+//Routes
+
+authRouter.get('/me',
+    bearerAuthorisationMiddleware,
+    authControllerInstance.authMe
+)
+
+authRouter.post('/login',
+    requestsAttemptsAuthorisationMiddleware,
+    userPasswordValidation,
+    userLoginOrEmailValidation,
+    inputValidationMiddleware,
+    authControllerInstance.login
+)
+
+authRouter.post('/registration',
+    requestsAttemptsAuthorisationMiddleware,
+    userPasswordValidation,
+    userLoginValidation,
+    userLoginExistValidation,
+    userEmailValidation,
+    userEmailExistValidation,
+    inputValidationMiddleware,
+    authControllerInstance.registration
+)
+
+authRouter.post('/registration-confirmation',
+    requestsAttemptsAuthorisationMiddleware,
+    codeConfirmedValidation,
+    inputValidationMiddleware,
+    authControllerInstance.registrationConfirmation
+)
+
+authRouter.post('/registration-email-resending',
+    requestsAttemptsAuthorisationMiddleware,
+    userEmailValidation,
+    emailDoesntValidation,
+    emailConfirmedValidation,
+    inputValidationMiddleware,
+    authControllerInstance.registrationEmailResending
+)
+
+authRouter.post('/logout',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    authControllerInstance.logout
+)
+
+authRouter.post('/refresh-token',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    authControllerInstance.refreshToken
+)
+
+authRouter.post('/password-recovery',
+    requestsAttemptsAuthorisationMiddleware,
+    userEmailValidation,
+    inputValidationMiddleware,
+    authControllerInstance.passwordRecovery
+)
+
+authRouter.post('/new-password',
+    requestsAttemptsAuthorisationMiddleware,
+    recoveryCodeValidation,
+    userNewPasswordValidation,
+    inputValidationMiddleware,
+    authControllerInstance.newPassword
+)

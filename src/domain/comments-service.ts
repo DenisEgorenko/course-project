@@ -3,7 +3,7 @@ import {CreateCommentInputModel} from '../models/comments-models/CreateCommentIn
 import {commentsRepositories} from '../repositories/comments/comments-repositories';
 import {authUserOutputModel} from '../repositories/users/users-query-repositories';
 import {UpdateCommentInputModel} from '../models/comments-models/UpdateCommentInputModel';
-
+import {v4 as uuidv4} from 'uuid';
 
 export type updateCommentQuery = {
     $set: {
@@ -15,26 +15,24 @@ export type CommentFilterQuery = {
     id: string
 }
 
-
-export const CommentsService = {
-
+class CommentsService {
     async createNewComment(user: authUserOutputModel, postId: string, requestData: CreateCommentInputModel) {
-        const newComment: commentsTypeDB = {
-            id: (+(new Date())).toString(),
-            content: requestData.content,
-            userId: user.userId,
-            postId: postId,
-            userLogin: user.login,
-            createdAt: new Date()
-        }
+        const newComment: commentsTypeDB = new commentsTypeDB(
+            uuidv4(),
+            requestData.content,
+            user.userId,
+            postId,
+            user.login,
+            new Date()
+        )
+
         try {
             await commentsRepositories.createNewComment(newComment)
             return newComment.id
         } catch (e) {
             return ''
         }
-    },
-
+    }
 
     async updateComment(id: string, updateData: UpdateCommentInputModel) {
 
@@ -49,7 +47,7 @@ export const CommentsService = {
         }
 
         return await commentsRepositories.updateComment(filterQuery, updateQuery)
-    },
+    }
 
     async deleteComment(id: string) {
         const filterQuery: CommentFilterQuery = {
@@ -58,3 +56,5 @@ export const CommentsService = {
         return await commentsRepositories.deleteComment(filterQuery)
     }
 }
+
+export const commentsService = new CommentsService()

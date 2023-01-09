@@ -2,7 +2,7 @@ import {blogTypeDB} from '../database/dbInterface';
 import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
 import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
-
+import {v4 as uuidv4} from 'uuid';
 
 export type updateBlogQuery = {
     $set: {
@@ -16,18 +16,17 @@ export type BlogFilterQuery = {
     id: string
 }
 
-export const blogsService = {
 
-
+class BlogsService {
     async createNewBlog(requestData: CreateBlogInputModel): Promise<string> {
 
-        const newBlog: blogTypeDB = {
-            id: (+(new Date())).toString(),
-            name: requestData.name,
-            description: requestData.description,
-            websiteUrl: requestData.websiteUrl,
-            createdAt: new Date()
-        }
+        const newBlog: blogTypeDB = new blogTypeDB(
+            uuidv4(),
+            requestData.name,
+            requestData.description,
+            requestData.websiteUrl,
+            new Date()
+        )
 
         try {
             await blogsRepositories.createNewBlog(newBlog)
@@ -35,8 +34,7 @@ export const blogsService = {
         } catch (e) {
             return ''
         }
-    },
-
+    }
 
     async updateBlog(id: string, updateData: UpdateBlogInputModel): Promise<boolean> {
 
@@ -53,8 +51,7 @@ export const blogsService = {
         }
 
         return await blogsRepositories.updateBlog(filterQuery, updateQuery)
-    },
-
+    }
 
     async deleteBlog(id: string) {
         const filterQuery: BlogFilterQuery = {
@@ -62,6 +59,6 @@ export const blogsService = {
         }
         return await blogsRepositories.deleteBlog(filterQuery)
     }
-
-
 }
+
+export const blogsService = new BlogsService()

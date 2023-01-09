@@ -21,10 +21,10 @@ const cookieRefreshTokenValidation = cookie('refreshToken')
     .withMessage('RefreshToken doesnt exist')
 
 
-SecurityDevicesRouter.get('/devices',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
-    async (req: Request, res: Response<sessionsOutputModel[]>) => {
+// Controller
+
+class SecurityDevicesController {
+    async getAllDevices(req: Request, res: Response<sessionsOutputModel[]>) {
         console.log(req.cookies.refreshToken)
 
         const userId: string = await jwtService.getUserIdByToken(req.cookies.refreshToken)
@@ -40,16 +40,9 @@ SecurityDevicesRouter.get('/devices',
 
         res.status(httpStatus.OK_200)
         res.json(sessions)
-    })
+    }
 
-// Update Comment
-
-
-// Delete Comment
-SecurityDevicesRouter.delete('/devices/',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
-    async (req: RequestWithParams<commentsURImodel>, res: Response) => {
+    async deleteAllDevices(req: RequestWithParams<commentsURImodel>, res: Response) {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
@@ -69,13 +62,9 @@ SecurityDevicesRouter.delete('/devices/',
 
         res.sendStatus(httpStatus.NO_CONTENT_204)
         return
-    })
+    }
 
-
-SecurityDevicesRouter.delete('/devices/:deviceId',
-    cookieRefreshTokenValidation,
-    inputValidationMiddleware_401,
-    async (req: RequestWithParams<deleteSecurityDevicesURIModel>, res: Response) => {
+    async deleteDevice(req: RequestWithParams<deleteSecurityDevicesURIModel>, res: Response) {
 
         const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
@@ -91,7 +80,7 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
             return
         }
 
-        if(accessData.userId !== session.userId) {
+        if (accessData.userId !== session.userId) {
             res.sendStatus(httpStatus.FORBIDDEN_403)
             return
         }
@@ -100,6 +89,30 @@ SecurityDevicesRouter.delete('/devices/:deviceId',
 
         res.sendStatus(httpStatus.NO_CONTENT_204)
         return
-    })
+    }
+}
+
+const securityDevicesControllerInstance = new SecurityDevicesController()
+
+
+// Routes
+
+SecurityDevicesRouter.get('/devices',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    securityDevicesControllerInstance.getAllDevices
+)
+
+SecurityDevicesRouter.delete('/devices/',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    securityDevicesControllerInstance.deleteAllDevices
+)
+
+SecurityDevicesRouter.delete('/devices/:deviceId',
+    cookieRefreshTokenValidation,
+    inputValidationMiddleware_401,
+    securityDevicesControllerInstance.deleteDevice
+)
 
 

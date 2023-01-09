@@ -2,20 +2,95 @@ import {resolutions} from '../models/videos-models/resolutionsModel';
 import mongoose from "mongoose";
 
 
-// export const postsDatabase = dataBase.collection<postTypeDB>('posts')
-// export const videosDatabase = dataBase.collection<videoTypeDB>('videos')
-// export const usersDatabase = dataBase.collection<userTypeDB>('users')
-// export const commentsDatabase = dataBase.collection<commentsTypeDB>('comments')
-// export const securityDevicesDatabase = dataBase.collection<securityDevicesTypeDB>('securityDevices')
+// types
 
-
-export type blogTypeDB = {
-    id: string,
-    name: string
-    description: string,
-    websiteUrl: string,
-    createdAt: Date
+export class blogTypeDB {
+    constructor(
+        public id: string,
+        public name: string,
+        public description: string,
+        public websiteUrl: string,
+        public createdAt: Date
+    ) {
+    }
 }
+
+export class postTypeDB {
+    constructor(
+        public id: string,
+        public title: string,
+        public shortDescription: string,
+        public content: string,
+        public blogId: string,
+        public blogName: string,
+        public createdAt: Date
+    ) {
+    }
+}
+
+export class userTypeDB {
+    constructor(
+        public accountData: {
+            id: string,
+            login: string,
+            email: string,
+            password: string,
+            salt: string,
+            refreshToken: string | null,
+            createdAt: Date
+        },
+        public emailConfirmation: {
+            confirmationCode: string | null,
+            expirationDate: Date | null,
+            isConfirmed: boolean
+        },
+        public passwordRecovery: {
+            recoveryCode: string | null,
+            expirationDate: Date | null,
+        }
+    ) {
+    }
+}
+
+export class commentsTypeDB {
+    constructor(
+        public id: string,
+        public content: string,
+        public userId: string,
+        public postId: string,
+        public userLogin: string,
+        public createdAt: Date
+    ) {
+    }
+}
+
+export class videoTypeDB {
+    constructor(
+        public id: string,
+        public title: string,
+        public author: string,
+        public canBeDownloaded: boolean,
+        public minAgeRestriction: number | null,
+        public createdAt: string,
+        public publicationDate: string,
+        public availableResolutions: Array<resolutions>
+    ) {
+    }
+}
+
+export class securityDevicesTypeDB {
+    constructor(
+        public ip: string,
+        public title: string,
+        public lastActiveDate: Date,
+        public deviceId: string,
+        public userId: string
+    ) {
+    }
+}
+
+// mongoose
+
 const blogSchema = new mongoose.Schema<blogTypeDB>({
     id: {type: String, required: true},
     name: {type: String, required: true},
@@ -25,15 +100,6 @@ const blogSchema = new mongoose.Schema<blogTypeDB>({
 })
 export const Blog = mongoose.model('blogs', blogSchema)
 
-export type postTypeDB = {
-    id: string,
-    title: string
-    shortDescription: string,
-    content: string,
-    blogId: string,
-    blogName: string,
-    createdAt: Date
-}
 const postSchema = new mongoose.Schema<postTypeDB>({
     id: {type: String, required: true},
     title: {type: String, required: true},
@@ -45,26 +111,6 @@ const postSchema = new mongoose.Schema<postTypeDB>({
 })
 export const Post = mongoose.model('posts', postSchema)
 
-export type userTypeDB = {
-    accountData: {
-        id: string,
-        login: string,
-        email: string,
-        password: string,
-        salt: string,
-        refreshToken: string | null,
-        createdAt: Date
-    },
-    emailConfirmation: {
-        confirmationCode: string | null,
-        expirationDate: Date | null,
-        isConfirmed: boolean
-    },
-    passwordRecovery: {
-        recoveryCode: string | null,
-        expirationDate: Date | null,
-    }
-}
 const userSchema = new mongoose.Schema<userTypeDB>({
     accountData: {
         id: {type: String, required: true},
@@ -87,14 +133,6 @@ const userSchema = new mongoose.Schema<userTypeDB>({
 })
 export const User = mongoose.model('users', userSchema)
 
-export type commentsTypeDB = {
-    id: string,
-    content: string,
-    userId: string,
-    postId: string,
-    userLogin: string,
-    createdAt: Date
-}
 const commentSchema = new mongoose.Schema<commentsTypeDB>({
     id: {type: String, required: true},
     content: {type: String, required: true},
@@ -105,16 +143,6 @@ const commentSchema = new mongoose.Schema<commentsTypeDB>({
 })
 export const Comment = mongoose.model('comments', commentSchema)
 
-export type videoTypeDB = {
-    id: string,
-    title: string,
-    author: string,
-    canBeDownloaded: boolean,
-    minAgeRestriction: number | null,
-    createdAt: string
-    publicationDate: string
-    availableResolutions: Array<resolutions>
-}
 const videoSchema = new mongoose.Schema<videoTypeDB>({
     id: {type: String, required: true},
     title: {type: String, required: true},
@@ -127,13 +155,6 @@ const videoSchema = new mongoose.Schema<videoTypeDB>({
 })
 export const Video = mongoose.model('videos', videoSchema)
 
-export type securityDevicesTypeDB = {
-    ip: string,
-    title: string,
-    lastActiveDate: Date,
-    deviceId: string,
-    userId: string
-}
 const securityDeviceSchema = new mongoose.Schema<securityDevicesTypeDB>({
     ip: {type: String, required: true},
     title: {type: String, required: true},

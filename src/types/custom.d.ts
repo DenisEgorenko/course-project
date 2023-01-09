@@ -5,7 +5,6 @@ declare namespace Express {
             login: string,
             email: string,
         },
-
         cookie
     }
 }

@@ -23,7 +23,7 @@ import {
     commentsOutputModel,
     commentsQueryRepositories
 } from '../repositories/comments/comments-query-repositories';
-import {CommentsService} from '../domain/comments-service';
+import {commentsService} from '../domain/comments-service';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {CreateCommentInputModel} from '../models/comments-models/CreateCommentInputModel';
 import {commentsQueryModel} from '../models/comments-models/commentsQueryModel';
@@ -63,35 +63,29 @@ export const commentContentValidation = body('content').trim().isLength({
     max: 300
 }).withMessage('Request should consist comment content with length more than 20 less than 301')
 
-// Posts
-// Read Posts
-postsRouter.get('/', async (req: RequestWithQuery<postsQueryModel>, res: Response<postsOutputModel>) => {
-    res.status(httpStatus.OK_200)
-    res.json(await postsQueryRepositories.getAllPosts(req.query))
-})
 
-postsRouter.get('/:id', async (req: RequestWithParams<postsURImodel>, res: Response<postTypeDB>) => {
+//Controller
 
-    const foundPost = await postsQueryRepositories.getPostById(req.params.id)
-
-    if (!foundPost) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
+class PostsController {
+    async getAllPosts(req: RequestWithQuery<postsQueryModel>, res: Response<postsOutputModel>) {
+        res.status(httpStatus.OK_200)
+        res.json(await postsQueryRepositories.getAllPosts(req.query))
     }
 
-    res.status(httpStatus.OK_200)
-    res.json(foundPost)
-})
+    async getPostById(req: RequestWithParams<postsURImodel>, res: Response<postTypeDB>) {
 
-// Create post
-postsRouter.post('/',
-    authorisationMiddleware,
-    titleValidation,
-    shortDescriptionValidation,
-    contentValidation,
-    blogIdValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<CreatePostInputModel>, res: Response<ErrorType | postTypeDB>) => {
+        const foundPost = await postsQueryRepositories.getPostById(req.params.id)
+
+        if (!foundPost) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
+
+        res.status(httpStatus.OK_200)
+        res.json(foundPost)
+    }
+
+    async createPost(req: RequestWithBody<CreatePostInputModel>, res: Response<ErrorType | postTypeDB>) {
         try {
             const id = await postsService.createNewPost(req.body)
             const result = await postsQueryRepositories.getPostById(id)
@@ -100,17 +94,9 @@ postsRouter.post('/',
         } catch (e) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
-    })
+    }
 
-// Update Post
-postsRouter.put('/:id',
-    authorisationMiddleware,
-    titleValidation,
-    shortDescriptionValidation,
-    contentValidation,
-    blogIdValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<postsURImodel, UpdatePostInputModel>, res: Response<ErrorType>) => {
+    async updatePost(req: RequestWithParamsAndBody<postsURImodel, UpdatePostInputModel>, res: Response<ErrorType>) {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
@@ -123,13 +109,9 @@ postsRouter.put('/:id',
         } else {
             res.sendStatus(httpStatus.NO_CONTENT_204)
         }
-    })
+    }
 
-// Delete Post
-postsRouter.delete('/:id',
-    authorisationMiddleware,
-    inputValidationMiddleware,
-    async (req: RequestWithParams<postsURImodel>, res: Response) => {
+    async deletePost(req: RequestWithParams<postsURImodel>, res: Response) {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
@@ -145,35 +127,24 @@ postsRouter.delete('/:id',
             res.sendStatus(httpStatus.NO_CONTENT_204)
         }
 
-    })
-
-
-// Comments
-
-// Get Posts Comments
-
-
-postsRouter.get('/:postId/comments', async (req: RequestWithParamsAndQuery<commentsURImodel, commentsQueryModel>, res: Response<commentsOutputModel>) => {
-
-    const post = await postsQueryRepositories.getPostById(req.params.postId)
-
-    if (!post) {
-        res.sendStatus(httpStatus.NOT_FOUND_404)
-        return
     }
 
-    const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query)
+    async getPostComments(req: RequestWithParamsAndQuery<commentsURImodel, commentsQueryModel>, res: Response<commentsOutputModel>) {
 
-    res.status(httpStatus.OK_200)
-    res.json(foundPost)
-})
+        const post = await postsQueryRepositories.getPostById(req.params.postId)
 
+        if (!post) {
+            res.sendStatus(httpStatus.NOT_FOUND_404)
+            return
+        }
 
-postsRouter.post('/:postId/comments',
-    bearerAuthorisationMiddleware,
-    commentContentValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<commentsURImodel, CreateCommentInputModel>, res: Response<commentOutputModel>) => {
+        const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query)
+
+        res.status(httpStatus.OK_200)
+        res.json(foundPost)
+    }
+
+    async createPostComment(req: RequestWithParamsAndBody<commentsURImodel, CreateCommentInputModel>, res: Response<commentOutputModel>) {
         const post = await postsQueryRepositories.getPostById(req.params.postId)
 
         if (!post) {
@@ -181,7 +152,7 @@ postsRouter.post('/:postId/comments',
             return
         }
         // @ts-ignore
-        const id = await CommentsService.createNewComment(req.user, req.params.postId, req.body)
+        const id = await commentsService.createNewComment(req.user, req.params.postId, req.body)
         const result = await commentsQueryRepositories.getCommentById(id)
 
         if (result !== null) {
@@ -189,4 +160,49 @@ postsRouter.post('/:postId/comments',
             res.json(result)
         }
 
-    })
+    }
+}
+
+const postsControllerInstance = new PostsController()
+
+// Posts
+// Read Posts
+postsRouter.get('/', postsControllerInstance.getAllPosts)
+
+postsRouter.get('/:id', postsControllerInstance.getPostById)
+
+postsRouter.post('/',
+    authorisationMiddleware,
+    titleValidation,
+    shortDescriptionValidation,
+    contentValidation,
+    blogIdValidation,
+    inputValidationMiddleware,
+    postsControllerInstance.createPost
+)
+
+postsRouter.put('/:id',
+    authorisationMiddleware,
+    titleValidation,
+    shortDescriptionValidation,
+    contentValidation,
+    blogIdValidation,
+    inputValidationMiddleware,
+    postsControllerInstance.updatePost
+)
+
+postsRouter.delete('/:id',
+    authorisationMiddleware,
+    inputValidationMiddleware,
+    postsControllerInstance.deletePost
+)
+
+// Comments
+postsRouter.get('/:postId/comments', postsControllerInstance.getPostComments)
+
+postsRouter.post('/:postId/comments',
+    bearerAuthorisationMiddleware,
+    commentContentValidation,
+    inputValidationMiddleware,
+    postsControllerInstance.createPostComment
+)

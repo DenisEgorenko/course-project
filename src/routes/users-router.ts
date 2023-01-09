@@ -41,21 +41,15 @@ const userEmailValidation = body('email')
     .withMessage('Request should consist email')
 
 
-// Read
-usersRouter.get('/', async (req: RequestWithQuery<usersQueryModel>, res: Response<usersOutputModel>) => {
-    res.status(httpStatus.OK_200)
-    res.json(await usersQueryRepositories.getAllUsers(req.query))
-})
+// Controller
 
+class UsersController {
+    async getAllUsers(req: RequestWithQuery<usersQueryModel>, res: Response<usersOutputModel>) {
+        res.status(httpStatus.OK_200)
+        res.json(await usersQueryRepositories.getAllUsers(req.query))
+    }
 
-// Create user
-usersRouter.post('/',
-    authorisationMiddleware,
-    userLoginValidation,
-    userPasswordValidation,
-    userEmailValidation,
-    inputValidationMiddleware,
-    async (req: RequestWithBody<CreateUserInputModel>, res: Response<ErrorType | userOutputModel>) => {
+    async createNewUser(req: RequestWithBody<CreateUserInputModel>, res: Response<ErrorType | userOutputModel>) {
         try {
             const id = await usersService.createNewUser(req.body)
             const result = await usersQueryRepositories.getUserById(id)
@@ -65,14 +59,9 @@ usersRouter.post('/',
             console.log(e)
             res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
-    })
+    }
 
-
-// Delete Videos
-usersRouter.delete('/:id',
-    authorisationMiddleware,
-    inputValidationMiddleware,
-    async (req: RequestWithParams<usersURImodel>, res: Response) => {
+    async deleteUser(req: RequestWithParams<usersURImodel>, res: Response) {
 
         if (!req.params.id) {
             res.sendStatus(httpStatus.BAD_REQUEST_400)
@@ -89,4 +78,25 @@ usersRouter.delete('/:id',
             return;
         }
 
-    })
+    }
+}
+
+const usersControllerInstance = new UsersController()
+
+// Routes
+usersRouter.get('/', usersControllerInstance.getAllUsers)
+
+usersRouter.post('/',
+    authorisationMiddleware,
+    userLoginValidation,
+    userPasswordValidation,
+    userEmailValidation,
+    inputValidationMiddleware,
+    usersControllerInstance.createNewUser
+)
+
+usersRouter.delete('/:id',
+    authorisationMiddleware,
+    inputValidationMiddleware,
+    usersControllerInstance.deleteUser
+)

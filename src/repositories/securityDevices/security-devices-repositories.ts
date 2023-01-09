@@ -22,7 +22,6 @@ export const securityDevicesRepositories = {
         }
     },
 
-
     async removeAllSecuritySessions(userId: string, deviceId: string) {
         try {
             await securityDevice.deleteMany({userId: userId, deviceId: {$ne: deviceId}})
