@@ -7,6 +7,8 @@ import {commentsURImodel} from "../models/comments-models/commentsURImodel";
 import {UpdateCommentInputModel} from "../models/comments-models/UpdateCommentInputModel";
 import {CreateLikeInputModel} from "../models/likes-model/createLikeInputModel";
 import {LikesModel} from "../models/likes-model/likesModel";
+import {accessDataType} from "../models/auth-models/assessDataType";
+import {jwtService} from "../application/jwt-service";
 
 export class CommentsController {
 
@@ -17,7 +19,11 @@ export class CommentsController {
 
     async getCommentById(req: RequestWithParams<commentsURImodel>, res: Response<commentOutputModel>) {
 
-        const foundComment = await commentsQueryRepositories.getCommentById(req.params.commentId)
+        const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
+
+        console.log(accessData)
+
+        const foundComment = await commentsQueryRepositories.getCommentById(req.params.commentId, accessData.userId)
 
         if (!foundComment) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -35,7 +41,8 @@ export class CommentsController {
             return;
         }
 
-        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId)
+        // @ts-ignore
+        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId, req.user.userId)
 
         if (!comment) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -63,7 +70,8 @@ export class CommentsController {
             return;
         }
 
-        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId)
+        // @ts-ignore
+        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId, req.user.userId)
 
         if (comment === null) {
             res.sendStatus(httpStatus.NOT_FOUND_404)
@@ -90,7 +98,8 @@ export class CommentsController {
 
     async setLikes(req: RequestWithParamsAndBody<commentsURImodel, CreateLikeInputModel>, res: Response<ErrorType>) {
 
-        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId)
+        // @ts-ignore
+        const comment = await commentsQueryRepositories.getCommentById(req.params.commentId, req.user.userId)
 
         if (!comment) {
             res.sendStatus(httpStatus.NOT_FOUND_404)

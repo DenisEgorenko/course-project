@@ -14,7 +14,8 @@ import {securityDevicesQueryRepositories} from "../repositories/securityDevices/
 import {PasswordRecoveryInputModel} from "../models/auth-models/passwordRecoveryInputModel";
 import {NewPasswordInputModel} from "../models/auth-models/newPasswordInputModel";
 import {userTypeDB} from "../database/dbInterface";
-
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 const mode: boolean = process.env.TEST_MODE !== 'true'
 

@@ -5,7 +5,7 @@ import {LikesModel} from "../../models/likes-model/likesModel";
 
 
 export const commentsQueryRepositories = {
-    async getAllPostComments(postId: string, query: commentsQueryModel) {
+    async getAllPostComments(postId: string, query: commentsQueryModel, userId: string) {
 
         const sortBy = query.sortBy ? query.sortBy : 'createdAt'
         const sortDirection: Sort = query.sortDirection === 'asc' ? 1 : -1
@@ -21,16 +21,14 @@ export const commentsQueryRepositories = {
 
         const items = await Comment.find({postId: postId}).sort(sort).skip(skip).limit(pageSize);
 
-        return commentsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
+        return commentsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items, userId)
     },
 
-    async getCommentById(id: string) {
+    async getCommentById(id: string, userId: string) {
         const foundComment = await Comment.find({id: id})
 
-        console.log(foundComment)
-
         if (foundComment.length) {
-            return commentToOutputModel(foundComment[0])
+            return commentToOutputModel(foundComment[0], userId)
         } else {
             return null
         }
@@ -59,7 +57,8 @@ export const commentsToOutputModel = (pagesCount: number,
                                       page: number,
                                       pageSize: number,
                                       totalCount: number,
-                                      items: commentsTypeDB[]
+                                      items: commentsTypeDB[],
+                                      userId: string
 ): commentsOutputModel => {
 
     return {
@@ -67,12 +66,13 @@ export const commentsToOutputModel = (pagesCount: number,
         page: page,
         pageSize: pageSize,
         totalCount: totalCount,
-        items: items.map(comment => commentToOutputModel(comment))
+        items: items.map(comment => commentToOutputModel(comment, userId))
     }
 }
 
 
-export const commentToOutputModel = (item: commentsTypeDB
+export const commentToOutputModel = (item: commentsTypeDB,
+                                     userId: string
 ): commentOutputModel => {
 
     // const likeStatus
@@ -86,8 +86,8 @@ export const commentToOutputModel = (item: commentsTypeDB
         likesInfo: {
             likesCount: item.likesInfo.likes.length,
             dislikesCount: item.likesInfo.dislikes.length,
-            myStatus: item.likesInfo.likes.includes(item.userId) ? LikesModel.Like
-                : item.likesInfo.dislikes.includes(item.userId) ? LikesModel.Dislike : LikesModel.None
+            myStatus: item.likesInfo.likes.includes(userId) ? LikesModel.Like
+                : item.likesInfo.dislikes.includes(userId) ? LikesModel.Dislike : LikesModel.None
         }
     }
 }
