@@ -60,8 +60,8 @@ export class AuthController {
             if (validPassword) {
                 res.status(httpStatus.OK_200)
                 res.cookie('refreshToken', refreshToken, {
-                    httpOnly: true,
-                    secure: true
+                    httpOnly: mode,
+                    secure: mode
                 })
                 res.json(
                     {

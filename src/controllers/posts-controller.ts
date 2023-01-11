@@ -22,8 +22,6 @@ import {
 } from "../repositories/comments/comments-query-repositories";
 import {CreateCommentInputModel} from "../models/comments-models/CreateCommentInputModel";
 import {CommentsService} from "../domain/comments-service";
-import {accessDataType} from "../models/auth-models/assessDataType";
-import {jwtService} from "../application/jwt-service";
 
 export class PostsController {
 
@@ -97,7 +95,6 @@ export class PostsController {
 
     async getPostComments(req: RequestWithParamsAndQuery<postsURImodel, commentsQueryModel>, res: Response<commentsOutputModel>) {
 
-        const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
 
         const post = await postsQueryRepositories.getPostById(req.params.postId)
 
@@ -106,7 +103,7 @@ export class PostsController {
             return
         }
 
-        const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query, accessData.userId)
+        const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query, req.userId)
 
         res.status(httpStatus.OK_200)
         res.json(foundPost)

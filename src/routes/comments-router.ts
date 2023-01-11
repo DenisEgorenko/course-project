@@ -4,6 +4,7 @@ import {inputValidationMiddleware} from '../middlewares/input-validation-middlew
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {commentsController} from "../composition-root";
 import {LikesModel} from "../models/likes-model/likesModel";
+import {likesAuthorisationMiddleware} from "../middlewares/likes-authorisation-middleware";
 
 export const CommentsRouter = Router({})
 
@@ -24,7 +25,7 @@ export const likesBodyValidation = body('likeStatus')
 // Router
 // Read Comments
 
-CommentsRouter.get('/:commentId', commentsController.getCommentById.bind(commentsController))
+CommentsRouter.get('/:commentId', likesAuthorisationMiddleware, commentsController.getCommentById.bind(commentsController))
 
 // Update Comment
 CommentsRouter.put('/:commentId',

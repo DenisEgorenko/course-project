@@ -7,8 +7,6 @@ import {commentsURImodel} from "../models/comments-models/commentsURImodel";
 import {UpdateCommentInputModel} from "../models/comments-models/UpdateCommentInputModel";
 import {CreateLikeInputModel} from "../models/likes-model/createLikeInputModel";
 import {LikesModel} from "../models/likes-model/likesModel";
-import {accessDataType} from "../models/auth-models/assessDataType";
-import {jwtService} from "../application/jwt-service";
 
 export class CommentsController {
 
@@ -19,11 +17,8 @@ export class CommentsController {
 
     async getCommentById(req: RequestWithParams<commentsURImodel>, res: Response<commentOutputModel>) {
 
-        const accessData: accessDataType = await jwtService.getAccessDataFromJWT(req.cookies.refreshToken)
-
-        console.log(accessData)
-
-        const foundComment = await commentsQueryRepositories.getCommentById(req.params.commentId, accessData.userId)
+        // @ts-ignore
+        const foundComment = await commentsQueryRepositories.getCommentById(req.params.commentId, req.userId)
 
         if (!foundComment) {
             res.sendStatus(httpStatus.NOT_FOUND_404)

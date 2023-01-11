@@ -5,6 +5,7 @@ import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {postsQueryRepositories} from '../repositories/posts/posts-query-repositories';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {postsController} from "../composition-root";
+import {likesAuthorisationMiddleware} from "../middlewares/likes-authorisation-middleware";
 
 export const postsRouter = Router({})
 
@@ -77,7 +78,8 @@ postsRouter.delete('/:id',
 )
 
 // Comments
-postsRouter.get('/:postId/comments', postsController.getPostComments.bind(postsController))
+// @ts-ignore
+postsRouter.get('/:postId/comments', likesAuthorisationMiddleware, postsController.getPostComments.bind(postsController))
 
 postsRouter.post('/:postId/comments',
     bearerAuthorisationMiddleware,
