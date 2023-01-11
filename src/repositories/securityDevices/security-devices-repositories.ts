@@ -1,7 +1,7 @@
 import {securityDevice, securityDevicesTypeDB} from '../../database/dbInterface';
 
 
-export const securityDevicesRepositories = {
+export class SecurityDevicesRepositories {
 
     async createNewSession(newSession: securityDevicesTypeDB) {
         try {
@@ -11,7 +11,7 @@ export const securityDevicesRepositories = {
         } catch (e) {
             return false
         }
-    },
+    }
 
     async updateSession(deviceId: string) {
         try {
@@ -20,7 +20,7 @@ export const securityDevicesRepositories = {
         } catch (e) {
             return false
         }
-    },
+    }
 
     async removeAllSecuritySessions(userId: string, deviceId: string) {
         try {
@@ -29,7 +29,7 @@ export const securityDevicesRepositories = {
         } catch (e) {
             return false
         }
-    },
+    }
 
     async removeSecuritySession(deviceId: string) {
         try {
@@ -38,6 +38,5 @@ export const securityDevicesRepositories = {
         } catch (e) {
             return false
         }
-    },
-
+    }
 }

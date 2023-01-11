@@ -1,6 +1,6 @@
 import {blogTypeDB} from '../database/dbInterface';
 import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
-import {blogsRepositories} from '../repositories/blogs/blogs-repositories';
+import {BlogsRepositories} from '../repositories/blogs/blogs-repositories';
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 import {v4 as uuidv4} from 'uuid';
 
@@ -17,7 +17,11 @@ export type BlogFilterQuery = {
 }
 
 
-class BlogsService {
+export class BlogsService {
+
+    constructor(protected blogsRepositories: BlogsRepositories) {
+    }
+
     async createNewBlog(requestData: CreateBlogInputModel): Promise<string> {
 
         const newBlog: blogTypeDB = new blogTypeDB(
@@ -29,7 +33,7 @@ class BlogsService {
         )
 
         try {
-            await blogsRepositories.createNewBlog(newBlog)
+            await this.blogsRepositories.createNewBlog(newBlog)
             return newBlog.id
         } catch (e) {
             return ''
@@ -50,15 +54,13 @@ class BlogsService {
             id: id
         }
 
-        return await blogsRepositories.updateBlog(filterQuery, updateQuery)
+        return await this.blogsRepositories.updateBlog(filterQuery, updateQuery)
     }
 
     async deleteBlog(id: string) {
         const filterQuery: BlogFilterQuery = {
             id: id
         }
-        return await blogsRepositories.deleteBlog(filterQuery)
+        return await this.blogsRepositories.deleteBlog(filterQuery)
     }
 }
-
-export const blogsService = new BlogsService()

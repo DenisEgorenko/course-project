@@ -59,7 +59,11 @@ export class commentsTypeDB {
         public userId: string,
         public postId: string,
         public userLogin: string,
-        public createdAt: Date
+        public createdAt: Date,
+        public likesInfo: {
+            likes: string[],
+            dislikes: string[]
+        }
     ) {
     }
 }
@@ -139,7 +143,11 @@ const commentSchema = new mongoose.Schema<commentsTypeDB>({
     userId: {type: String, required: true},
     postId: {type: String, required: true},
     userLogin: {type: String, required: true},
-    createdAt: {type: Date, required: true}
+    createdAt: {type: Date, required: true},
+    likesInfo: {
+        likes: {type: [String], required: true},
+        dislikes: {type: [String], required: true}
+    }
 })
 export const Comment = mongoose.model('comments', commentSchema)
 

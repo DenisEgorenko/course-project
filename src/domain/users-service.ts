@@ -1,5 +1,5 @@
 import {userTypeDB} from '../database/dbInterface';
-import {usersRepositories} from '../repositories/users/users-repositories';
+import {UsersRepositories} from '../repositories/users/users-repositories';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {authInputModel} from '../models/auth-models/authInputModel';
 import {passwordService} from '../application/password-service';
@@ -9,7 +9,11 @@ export type UserFilterQuery = {
     id: string
 }
 
-class UsersService {
+export class UsersService {
+
+    constructor(protected usersRepositories: UsersRepositories) {
+    }
+
     async createNewUser(requestData: CreateUserInputModel): Promise<string> {
 
         const passwordSalt = await passwordService.generateSalt()
@@ -37,7 +41,7 @@ class UsersService {
         )
 
         try {
-            await usersRepositories.createNewUser(newUser)
+            await this.usersRepositories.createNewUser(newUser)
             return newUser.accountData.id
         } catch (e) {
             return ''
@@ -53,8 +57,7 @@ class UsersService {
         const filterQuery: UserFilterQuery = {
             id: id
         }
-        return await usersRepositories.deleteUser(filterQuery)
+        return await this.usersRepositories.deleteUser(filterQuery)
     }
 }
 
-export const usersService = new UsersService()

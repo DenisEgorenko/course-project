@@ -1,19 +1,25 @@
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {passwordService} from '../application/password-service';
 import {securityDevicesTypeDB, userTypeDB} from '../database/dbInterface';
-import {usersRepositories} from '../repositories/users/users-repositories';
+import {UsersRepositories} from '../repositories/users/users-repositories';
 import {v4 as uuidv4} from 'uuid';
 import add from 'date-fns/add'
 import {EmailManager} from '../managers/email-manager';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {jwtService} from '../application/jwt-service';
 import {accessDataType} from '../models/auth-models/assessDataType';
-import {securityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
+import {SecurityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
 
 
-class AuthService {
+export class AuthService {
+
+    constructor(
+        protected usersRepository: UsersRepositories,
+        protected securityDevicesRepositories: SecurityDevicesRepositories
+    ) {
+
+    }
+
     async createUser(userData: CreateUserInputModel) {
-
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
 
@@ -40,7 +46,7 @@ class AuthService {
             }
         )
 
-        const userCreateRes = await usersRepositories.createNewUser(newUser)
+        const userCreateRes = await this.usersRepository.createNewUser(newUser)
 
         try {
             await EmailManager.sendRegistrationEmail(newUser)
@@ -51,18 +57,17 @@ class AuthService {
         return userCreateRes
     }
 
-    async confirmEmail(code: string) {
-        let user = await usersQueryRepositories.getUserByConfirmationCode(code)
+    async confirmEmail(code: string, user: userTypeDB) {
+
         if (!user) return false
         if (user.emailConfirmation.isConfirmed) return false
         if (user.emailConfirmation.confirmationCode !== code) return false
         if (user.emailConfirmation.expirationDate && user.emailConfirmation.expirationDate < new Date()) return false
-        let result = await usersRepositories.updateConfirmation(user.accountData.id)
+        let result = await this.usersRepository.updateConfirmation(user.accountData.id)
         return result
     }
 
-    async resendConfirmEmail(email: string) {
-        let user = await usersQueryRepositories.getUserByEmailOrLogin(email)
+    async resendConfirmEmail(email: string, user: userTypeDB) {
         if (!user) return false
         if (user.emailConfirmation.isConfirmed) return false
 
@@ -71,11 +76,11 @@ class AuthService {
             hours: 1
         })
 
-        let updated = await usersRepositories.changeConfirmationData(user.accountData.id, newCode, newExpDate)
+        let updated = await this.usersRepository.changeConfirmationData(user.accountData.id, newCode, newExpDate)
 
         if (updated) {
 
-            await EmailManager.sendRegistrationEmail(await usersQueryRepositories.getUserByEmailOrLogin(email))
+            await EmailManager.sendRegistrationEmail(user)
 
             return true
         }
@@ -96,9 +101,9 @@ class AuthService {
             userId
         )
 
-        await securityDevicesRepositories.createNewSession(newSession)
+        await this.securityDevicesRepositories.createNewSession(newSession)
 
-        await usersRepositories.updateRefreshToken(userId, refreshToken)
+        await this.usersRepository.updateRefreshToken(userId, refreshToken)
 
         return jwtToken
     }
@@ -108,31 +113,31 @@ class AuthService {
 
         const jwtToken = await jwtService.createRefreshToken(userId, deviceId, refreshToken)
 
-        await securityDevicesRepositories.updateSession(deviceId)
+        await this.securityDevicesRepositories.updateSession(deviceId)
 
-        await usersRepositories.updateRefreshToken(userId, refreshToken)
+        await this.usersRepository.updateRefreshToken(userId, refreshToken)
 
         return jwtToken
     }
 
     async removeAllSecuritySessions(userId: string, deviceId: string) {
 
-        await securityDevicesRepositories.removeAllSecuritySessions(userId, deviceId)
+        await this.securityDevicesRepositories.removeAllSecuritySessions(userId, deviceId)
 
         return true
     }
 
     async removeSecuritySession(deviceId: string) {
 
-        await securityDevicesRepositories.removeSecuritySession(deviceId)
+        await this.securityDevicesRepositories.removeSecuritySession(deviceId)
 
         return true
     }
 
     async logOutWithRefreshToken(accessData: accessDataType) {
-        await securityDevicesRepositories.removeSecuritySession(accessData.deviceId)
+        await this.securityDevicesRepositories.removeSecuritySession(accessData.deviceId)
 
-        return await usersRepositories.updateRefreshToken(accessData.userId, null)
+        return await this.usersRepository.updateRefreshToken(accessData.userId, null)
     }
 
     async passwordRecovery(user: userTypeDB) {
@@ -144,7 +149,7 @@ class AuthService {
 
         await EmailManager.sendPasswordRecoveryEmail(user.accountData.email, recoveryCode)
 
-        await usersRepositories.updatePasswordRecoveryData(user.accountData.id, recoveryCode, expirationDate)
+        await this.usersRepository.updatePasswordRecoveryData(user.accountData.id, recoveryCode, expirationDate)
 
         return true
     }
@@ -154,8 +159,6 @@ class AuthService {
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(newPassword, passwordSalt)
 
-        return await usersRepositories.setNewPassword(userId, passwordSalt, passwordHash)
+        return await this.usersRepository.setNewPassword(userId, passwordSalt, passwordHash)
     }
 }
-
-export const authService = new AuthService()

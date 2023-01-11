@@ -2,7 +2,7 @@ import {User, userTypeDB} from '../../database/dbInterface';
 import {UserFilterQuery} from '../../domain/users-service';
 
 
-export const usersRepositories = {
+export class UsersRepositories {
 
     async createNewUser(newUser: userTypeDB) {
         try {
@@ -12,12 +12,12 @@ export const usersRepositories = {
         } catch (e) {
             return false
         }
-    },
+    }
 
     async deleteUser(filterQuery: UserFilterQuery): Promise<boolean> {
         const result = await User.deleteOne(filterQuery)
         return result.deletedCount >= 1
-    },
+    }
 
     async updateConfirmation(userId: string) {
         const result = await User.updateOne(
@@ -25,7 +25,7 @@ export const usersRepositories = {
             {$set: {'emailConfirmation.isConfirmed': true}}
         )
         return result.modifiedCount >= 1;
-    },
+    }
 
     async updateRefreshToken(userId: string, refreshToken: string | null) {
         const result = await User.updateOne(
@@ -33,7 +33,7 @@ export const usersRepositories = {
             {$set: {'accountData.refreshToken': refreshToken}}
         )
         return result.modifiedCount >= 1;
-    },
+    }
 
 
     async changeConfirmationData(userId: string, newCode: string, newExpDate: Date) {
@@ -47,7 +47,7 @@ export const usersRepositories = {
             }
         )
         return result.modifiedCount >= 1;
-    },
+    }
 
     async updatePasswordRecoveryData(userId: string, recoveryCode: string, expirationData: Date) {
         const result = await User.updateOne(
@@ -60,7 +60,7 @@ export const usersRepositories = {
             }
         )
         return result.modifiedCount >= 1;
-    },
+    }
 
     async setNewPassword(userId: string, passwordSalt: string, passwordHash: string) {
         const result = await User.updateOne(
@@ -75,5 +75,5 @@ export const usersRepositories = {
             }
         )
         return result.modifiedCount >= 1;
-    },
+    }
 }

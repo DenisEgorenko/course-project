@@ -1,3 +1,3 @@
 export type commentsURImodel = {
-    postId: string
+    commentId: string
 }

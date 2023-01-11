@@ -1,15 +1,8 @@
-import {Request, Response, Router} from 'express';
-import {ErrorType, httpStatus} from '../types/responseTypes';
-import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from '../types/requestTypes';
-import {videoURImodel} from '../models/videos-models/videoURImodel';
-import {createVideoInputModel} from '../models/videos-models/CreateVideoInputModel';
-import {UpdateVideoInputModel} from '../models/videos-models/UpdateVideoInputModel';
-import {videosRepositories} from '../repositories/videos/videos-repositories';
+import {Router} from 'express';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {resolutions} from '../models/videos-models/resolutionsModel';
-import {videosQueryRepositories} from '../repositories/videos/videos-query-repositories';
-import {videoTypeDB} from '../database/dbInterface';
+import {videosController} from "../composition-root";
 
 export const videosRouter = Router({})
 
@@ -45,72 +38,17 @@ const publicationDateValidation = body('publicationDate').optional().isString().
 
 // Controller
 
-class VideosController {
-    async getAllVideos(req: Request, res: Response<Array<videoTypeDB>>) {
-        res.status(httpStatus.OK_200)
-        res.json(await videosQueryRepositories.getAllVideos())
-    }
-
-    async getVideoById(req: RequestWithParams<videoURImodel>, res: Response<videoTypeDB>) {
-
-        const foundVideos = await videosQueryRepositories.getVideoById(req.params.id)
-
-        if (!foundVideos) {
-            res.sendStatus(httpStatus.NOT_FOUND_404)
-            return
-        }
-
-        res.status(httpStatus.OK_200)
-        res.json(foundVideos)
-    }
-
-    async createVideo(req: RequestWithBody<createVideoInputModel>, res: Response<ErrorType | videoTypeDB>) {
-        res.status(httpStatus.CREATED_201)
-        res.json(await videosRepositories.createNewVideo(req.body))
-    }
-
-    async updateVideo(req: RequestWithParamsAndBody<videoURImodel, UpdateVideoInputModel>, res: Response<ErrorType>) {
-
-        if (!await videosRepositories.updateVideo(req.params.id, req.body)) {
-            res.sendStatus(httpStatus.NOT_FOUND_404)
-            return;
-        } else {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
-        }
-    }
-
-    async deleteVideo(req: RequestWithParams<videoURImodel>, res: Response) {
-
-        if (!req.params.id) {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return;
-        }
-
-        const deleteVideo = await videosRepositories.deleteVideo(req.params.id)
-
-        if (!deleteVideo) {
-            res.sendStatus(httpStatus.NOT_FOUND_404)
-            return
-        } else {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
-        }
-
-    }
-}
-
-const videosControllerInstance = new VideosController()
-
 // Routes
-videosRouter.get('/', videosControllerInstance.getAllVideos)
+videosRouter.get('/', videosController.getAllVideos.bind(videosController))
 
-videosRouter.get('/:id', videosControllerInstance.getVideoById)
+videosRouter.get('/:id', videosController.getVideoById.bind(videosController))
 
 videosRouter.post('/',
     titleValidation,
     authorValidation,
     availableResolutionsValidationRequired,
     inputValidationMiddleware,
-    videosControllerInstance.createVideo
+    videosController.createVideo.bind(videosController)
 )
 
 videosRouter.put('/:id',
@@ -121,8 +59,8 @@ videosRouter.put('/:id',
     availableResolutionsValidation,
     publicationDateValidation,
     inputValidationMiddleware,
-    videosControllerInstance.updateVideo
+    videosController.updateVideo.bind(videosController)
 )
 
 // Delete Videos
-videosRouter.delete('/:id', videosControllerInstance.deleteVideo)
+videosRouter.delete('/:id', videosController.deleteVideo.bind(videosController))

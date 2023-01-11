@@ -1,6 +1,6 @@
 import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
 import {postTypeDB} from '../database/dbInterface';
-import {postsRepositories} from '../repositories/posts/posts-repositories';
+import {PostsRepositories} from '../repositories/posts/posts-repositories';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 import {v4 as uuidv4} from 'uuid';
 
@@ -19,7 +19,12 @@ export type PostFilterQuery = {
 }
 
 
-class PostsService {
+export class PostsService {
+
+    constructor(protected postsRepositories: PostsRepositories) {
+
+    }
+
     async createNewPost(requestData: CreatePostInputModel) {
         const newPost: postTypeDB = new postTypeDB(
             uuidv4(),
@@ -32,7 +37,7 @@ class PostsService {
         )
 
         try {
-            await postsRepositories.createNewPost(newPost)
+            await this.postsRepositories.createNewPost(newPost)
             return newPost.id
         } catch (e) {
             return ''
@@ -54,15 +59,14 @@ class PostsService {
             id: id
         }
 
-        return await postsRepositories.updatePost(filterQuery, updateQuery)
+        return await this.postsRepositories.updatePost(filterQuery, updateQuery)
     }
 
     async deletePost(id: string) {
         const filterQuery: PostFilterQuery = {
             id: id
         }
-        return await postsRepositories.deletePost(filterQuery)
+        return await this.postsRepositories.deletePost(filterQuery)
     }
 }
 
-export const postsService = new PostsService()

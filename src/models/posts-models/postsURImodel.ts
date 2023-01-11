@@ -1,3 +1,3 @@
 export type postsURImodel = {
-    id: string
+    postId: string
 }

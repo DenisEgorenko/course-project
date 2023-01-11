@@ -3,7 +3,7 @@ import {UpdateVideoInputModel} from '../../models/videos-models/UpdateVideoInput
 import {Video, videoTypeDB} from '../../database/dbInterface';
 import {v4 as uuidv4} from 'uuid';
 
-export const videosRepositories = {
+export class VideosRepositories {
 
     async createNewVideo(requestData: createVideoInputModel) {
         const publicationDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString()
@@ -24,7 +24,7 @@ export const videosRepositories = {
         await newVideoEntity.save()
 
         return newVideo
-    },
+    }
 
     async updateVideo(id: string, updateData: UpdateVideoInputModel) {
 
@@ -41,7 +41,7 @@ export const videosRepositories = {
                 }
             })
         return result.modifiedCount >= 1;
-    },
+    }
 
     async deleteVideo(id: string) {
         const result = await Video.deleteOne({id: id})

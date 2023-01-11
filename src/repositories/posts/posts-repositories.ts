@@ -2,7 +2,7 @@ import {Post, postTypeDB} from '../../database/dbInterface';
 import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
 
 
-export const postsRepositories = {
+export class PostsRepositories {
 
     async createNewPost(newPost: postTypeDB) {
         try {
@@ -12,7 +12,7 @@ export const postsRepositories = {
         } catch (e) {
             return false
         }
-    },
+    }
 
     async updatePost(filterQuery: PostFilterQuery, updateQuery: updatePostQuery) {
         const result = await Post.updateOne(
@@ -20,12 +20,10 @@ export const postsRepositories = {
             updateQuery
         )
         return result.modifiedCount >= 1;
-    },
+    }
 
     async deletePost(filterQuery: PostFilterQuery): Promise<boolean> {
         const result = await Post.deleteOne(filterQuery)
         return result.deletedCount >= 1
-    },
-
-
+    }
 }
