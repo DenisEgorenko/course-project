@@ -8,8 +8,10 @@ import {EmailManager} from '../managers/email-manager';
 import {jwtService} from '../application/jwt-service';
 import {accessDataType} from '../models/auth-models/assessDataType';
 import {SecurityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
+import {injectable} from "inversify";
 
 
+@injectable()
 export class AuthService {
 
     constructor(

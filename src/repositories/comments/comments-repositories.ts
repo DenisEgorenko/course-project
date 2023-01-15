@@ -1,7 +1,8 @@
 import {Comment, commentsTypeDB} from '../../database/dbInterface';
 import {CommentFilterQuery, updateCommentLikeInfoQuery, updateCommentQuery} from '../../domain/comments-service';
+import {injectable} from "inversify";
 
-
+@injectable()
 export class CommentsRepositories {
 
     async createNewComment(newComment: commentsTypeDB) {

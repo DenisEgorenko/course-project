@@ -2,9 +2,10 @@ import {Router} from 'express';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
-import {commentsController} from "../composition-root";
+import {container} from "../composition-root";
 import {LikesModel} from "../models/likes-model/likesModel";
 import {likesAuthorisationMiddleware} from "../middlewares/likes-authorisation-middleware";
+import {CommentsController} from "../controllers/comments-controller";
 
 export const CommentsRouter = Router({})
 
@@ -21,6 +22,8 @@ export const likesBodyValidation = body('likeStatus')
     .withMessage('Request should consist right values for likes')
 
 // Controller
+
+const commentsController = container.resolve(CommentsController)
 
 // Router
 // Read Comments

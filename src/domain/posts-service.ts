@@ -3,6 +3,7 @@ import {postTypeDB} from '../database/dbInterface';
 import {PostsRepositories} from '../repositories/posts/posts-repositories';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 import {v4 as uuidv4} from 'uuid';
+import {injectable} from "inversify";
 
 
 export type updatePostQuery = {
@@ -19,6 +20,7 @@ export type PostFilterQuery = {
 }
 
 
+@injectable()
 export class PostsService {
 
     constructor(protected postsRepositories: PostsRepositories) {

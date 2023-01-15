@@ -22,7 +22,10 @@ import {
 } from "../repositories/comments/comments-query-repositories";
 import {CreateCommentInputModel} from "../models/comments-models/CreateCommentInputModel";
 import {CommentsService} from "../domain/comments-service";
+import {injectable} from "inversify";
 
+
+@injectable()
 export class PostsController {
 
     constructor(
@@ -103,6 +106,7 @@ export class PostsController {
             return
         }
 
+        // @ts-ignore
         const foundPost = await commentsQueryRepositories.getAllPostComments(req.params.postId, req.query, req.userId)
 
         res.status(httpStatus.OK_200)
@@ -118,6 +122,7 @@ export class PostsController {
         }
         // @ts-ignore
         const id = await this.commentsService.createNewComment(req.user, req.params.postId, req.body)
+        // @ts-ignore
         const result = await commentsQueryRepositories.getCommentById(id, req.user.userId)
 
         if (result !== null) {

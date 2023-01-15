@@ -2,7 +2,8 @@ import {Router} from 'express';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
-import {usersController} from "../composition-root";
+import {container} from "../composition-root";
+import {UsersController} from "../controllers/users-controller";
 
 export const usersRouter = Router({})
 
@@ -32,6 +33,9 @@ const userEmailValidation = body('email')
 
 
 // Controller
+
+const usersController = container.resolve(UsersController)
+
 
 // Routes
 usersRouter.get('/', usersController.getAllUsers.bind(usersController))

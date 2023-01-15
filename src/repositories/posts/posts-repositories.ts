@@ -1,7 +1,8 @@
 import {Post, postTypeDB} from '../../database/dbInterface';
 import {PostFilterQuery, updatePostQuery} from '../../domain/posts-service';
+import {injectable} from "inversify";
 
-
+@injectable()
 export class PostsRepositories {
 
     async createNewPost(newPost: postTypeDB) {

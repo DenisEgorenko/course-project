@@ -3,7 +3,8 @@ import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {contentValidation, shortDescriptionValidation, titleValidation} from './posts-router';
-import {blogsController} from "../composition-root";
+import {container} from "../composition-root";
+import {BlogsController} from "../controllers/blogs-controller";
 
 export const blogsRouter = Router({})
 
@@ -35,6 +36,8 @@ const UrlValidation = body('websiteUrl')
 
 
 // Controller
+
+const blogsController = container.resolve(BlogsController)
 
 
 // Routes

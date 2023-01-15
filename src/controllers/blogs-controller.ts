@@ -18,7 +18,9 @@ import {postsOutputModel, postsQueryRepositories} from "../repositories/posts/po
 import {CreateBlogInputModel} from "../models/blogs-models/CreateBlogInputModel";
 import {CreatePostInputModel} from "../models/posts-models/CreatePostInputModel";
 import {UpdateBlogInputModel} from "../models/blogs-models/UpdateBlogInputModel";
+import {injectable} from "inversify";
 
+@injectable()
 export class BlogsController {
 
     constructor(

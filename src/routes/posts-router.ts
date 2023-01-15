@@ -4,8 +4,10 @@ import {inputValidationMiddleware} from '../middlewares/input-validation-middlew
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {postsQueryRepositories} from '../repositories/posts/posts-query-repositories';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
-import {postsController} from "../composition-root";
 import {likesAuthorisationMiddleware} from "../middlewares/likes-authorisation-middleware";
+import {container} from "../composition-root";
+import {AuthController} from "../controllers/auth-controller";
+import {PostsController} from "../controllers/posts-controller";
 
 export const postsRouter = Router({})
 
@@ -44,6 +46,9 @@ export const commentContentValidation = body('content').trim().isLength({
 
 
 //Controller
+
+const postsController = container.resolve(PostsController)
+
 
 // Posts
 // Read Posts

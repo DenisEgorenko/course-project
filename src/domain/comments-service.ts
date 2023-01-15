@@ -5,6 +5,7 @@ import {authUserOutputModel} from '../repositories/users/users-query-repositorie
 import {UpdateCommentInputModel} from '../models/comments-models/UpdateCommentInputModel';
 import {v4 as uuidv4} from 'uuid';
 import {LikesModel} from "../models/likes-model/likesModel";
+import {injectable} from "inversify";
 
 export type updateCommentQuery = {
     $set: {
@@ -22,6 +23,8 @@ export type CommentFilterQuery = {
     id: string
 }
 
+
+@injectable()
 export class CommentsService {
 
     constructor(protected commentsRepositories: CommentsRepositories) {

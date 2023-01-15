@@ -1,7 +1,8 @@
 import {Router} from 'express';
 import {cookie} from 'express-validator';
 import {inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
-import {securityDevicesController} from "../composition-root";
+import {container} from "../composition-root";
+import {SecurityDevicesController} from "../controllers/security-devices-controller";
 
 export const SecurityDevicesRouter = Router({})
 
@@ -12,6 +13,9 @@ const cookieRefreshTokenValidation = cookie('refreshToken')
 
 
 // Controller
+
+
+const securityDevicesController = container.resolve(SecurityDevicesController)
 
 
 // Routes

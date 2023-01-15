@@ -1,7 +1,8 @@
 import {Blog, blogTypeDB} from '../../database/dbInterface';
 import {BlogFilterQuery, updateBlogQuery} from '../../domain/blogs-service';
+import {injectable} from "inversify";
 
-
+@injectable()
 export class BlogsRepositories {
 
     async createNewBlog(newBlog: blogTypeDB) {

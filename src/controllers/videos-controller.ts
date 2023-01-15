@@ -7,7 +7,10 @@ import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody} from "../t
 import {videoURImodel} from "../models/videos-models/videoURImodel";
 import {createVideoInputModel} from "../models/videos-models/CreateVideoInputModel";
 import {UpdateVideoInputModel} from "../models/videos-models/UpdateVideoInputModel";
+import {injectable} from "inversify";
 
+
+@injectable()
 export class VideosController {
 
     constructor(protected videosRepositories: VideosRepositories) {

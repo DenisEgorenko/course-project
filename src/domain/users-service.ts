@@ -3,12 +3,14 @@ import {UsersRepositories} from '../repositories/users/users-repositories';
 import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
 import {authInputModel} from '../models/auth-models/authInputModel';
 import {passwordService} from '../application/password-service';
+import {injectable} from "inversify";
 
 
 export type UserFilterQuery = {
     id: string
 }
 
+@injectable()
 export class UsersService {
 
     constructor(protected usersRepositories: UsersRepositories) {

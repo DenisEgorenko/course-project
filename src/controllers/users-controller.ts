@@ -10,7 +10,10 @@ import {
 import {ErrorType, httpStatus} from "../types/responseTypes";
 import {CreateUserInputModel} from "../models/users-models/CreateUserInputModel";
 import {usersURImodel} from "../models/users-models/usersURImodel";
+import {injectable} from "inversify";
 
+
+@injectable()
 export class UsersController {
 
     constructor(protected usersService: UsersService) {

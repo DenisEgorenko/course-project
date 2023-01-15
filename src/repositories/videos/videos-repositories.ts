@@ -2,7 +2,10 @@ import {createVideoInputModel} from '../../models/videos-models/CreateVideoInput
 import {UpdateVideoInputModel} from '../../models/videos-models/UpdateVideoInputModel';
 import {Video, videoTypeDB} from '../../database/dbInterface';
 import {v4 as uuidv4} from 'uuid';
+import {injectable} from "inversify";
 
+
+@injectable()
 export class VideosRepositories {
 
     async createNewVideo(requestData: createVideoInputModel) {

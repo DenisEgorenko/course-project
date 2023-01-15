@@ -3,6 +3,7 @@ import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel'
 import {BlogsRepositories} from '../repositories/blogs/blogs-repositories';
 import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
 import {v4 as uuidv4} from 'uuid';
+import {injectable} from "inversify";
 
 export type updateBlogQuery = {
     $set: {
@@ -16,7 +17,7 @@ export type BlogFilterQuery = {
     id: string
 }
 
-
+@injectable()
 export class BlogsService {
 
     constructor(protected blogsRepositories: BlogsRepositories) {

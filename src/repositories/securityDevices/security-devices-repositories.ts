@@ -1,6 +1,7 @@
 import {securityDevice, securityDevicesTypeDB} from '../../database/dbInterface';
+import {injectable} from "inversify";
 
-
+@injectable()
 export class SecurityDevicesRepositories {
 
     async createNewSession(newSession: securityDevicesTypeDB) {

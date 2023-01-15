@@ -4,7 +4,8 @@ import {inputValidationMiddleware, inputValidationMiddleware_401} from '../middl
 import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {requestsAttemptsAuthorisationMiddleware} from "../middlewares/requests-attempts-middleware";
-import {authController} from "../composition-root";
+import {container} from "../composition-root";
+import {AuthController} from "../controllers/auth-controller";
 
 export const authRouter = Router({})
 
@@ -100,6 +101,8 @@ const cookieRefreshTokenValidation = cookie('refreshToken')
 
 
 // Controller
+
+const authController = container.resolve(AuthController)
 
 //Routes
 

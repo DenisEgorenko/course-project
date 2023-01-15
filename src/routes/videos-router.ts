@@ -2,7 +2,8 @@ import {Router} from 'express';
 import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {resolutions} from '../models/videos-models/resolutionsModel';
-import {videosController} from "../composition-root";
+import {container} from "../composition-root";
+import {VideosController} from "../controllers/videos-controller";
 
 export const videosRouter = Router({})
 
@@ -37,6 +38,8 @@ const publicationDateValidation = body('publicationDate').optional().isString().
 
 
 // Controller
+
+const videosController = container.resolve(VideosController)
 
 // Routes
 videosRouter.get('/', videosController.getAllVideos.bind(videosController))

@@ -15,11 +15,14 @@ import {PasswordRecoveryInputModel} from "../models/auth-models/passwordRecovery
 import {NewPasswordInputModel} from "../models/auth-models/newPasswordInputModel";
 import {userTypeDB} from "../database/dbInterface";
 import * as dotenv from 'dotenv'
+import {injectable} from "inversify";
+
 dotenv.config()
 
 const mode: boolean = process.env.TEST_MODE !== 'true'
 
 
+@injectable()
 export class AuthController {
 
     constructor(

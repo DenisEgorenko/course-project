@@ -10,7 +10,10 @@ import {RequestWithParams} from "../types/requestTypes";
 import {commentsURImodel} from "../models/comments-models/commentsURImodel";
 import {accessDataType} from "../models/auth-models/assessDataType";
 import {deleteSecurityDevicesURIModel} from "../models/security-devices-models/deleteSecurityDevicesURImodel";
+import {injectable} from "inversify";
 
+
+@injectable()
 export class SecurityDevicesController {
 
     constructor(protected authService: AuthService) {

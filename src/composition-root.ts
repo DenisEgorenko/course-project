@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import {UsersRepositories} from "./repositories/users/users-repositories";
 import {UsersService} from "./domain/users-service";
 import {BlogsRepositories} from "./repositories/blogs/blogs-repositories";
@@ -16,27 +17,28 @@ import {CommentsController} from "./controllers/comments-controller";
 import {PostsController} from "./controllers/posts-controller";
 import {SecurityDevicesController} from "./controllers/security-devices-controller";
 import {VideosController} from "./controllers/videos-controller";
+import {Container} from "inversify";
 
 
-const usersRepositories = new UsersRepositories()
-const blogsRepositories = new BlogsRepositories()
-const commentsRepositories = new CommentsRepositories()
-const postsRepositories = new PostsRepositories()
-const securityDevicesRepositories = new SecurityDevicesRepositories()
-const videosRepositories = new VideosRepositories()
+export const container = new Container()
 
+container.bind(UsersRepositories).to(UsersRepositories)
+container.bind(SecurityDevicesRepositories).to(SecurityDevicesRepositories)
+container.bind(BlogsRepositories).to(BlogsRepositories)
+container.bind(CommentsRepositories).to(CommentsRepositories)
+container.bind(PostsRepositories).to(PostsRepositories)
+container.bind(VideosRepositories).to(VideosRepositories)
 
-const usersService = new UsersService(usersRepositories)
-const authService = new AuthService(usersRepositories, securityDevicesRepositories)
-const blogsService = new BlogsService(blogsRepositories)
-const postsService = new PostsService(postsRepositories)
-const commentsService = new CommentsService(commentsRepositories)
+container.bind(UsersService).to(UsersService)
+container.bind(AuthService).to(AuthService)
+container.bind(BlogsService).to(BlogsService)
+container.bind(PostsService).to(PostsService)
+container.bind(CommentsService).to(CommentsService)
 
-
-export const usersController = new UsersController(usersService)
-export const authController = new AuthController(authService, usersService)
-export const blogsController = new BlogsController(blogsService, postsService)
-export const postsController = new PostsController(postsService, commentsService)
-export const securityDevicesController = new SecurityDevicesController(authService)
-export const commentsController = new CommentsController(commentsService)
-export const videosController = new VideosController(videosRepositories)
+container.bind(UsersController).to(UsersController)
+container.bind(AuthController).to(AuthController)
+container.bind(BlogsController).to(BlogsController)
+container.bind(PostsController).to(PostsController)
+container.bind(SecurityDevicesController).to(SecurityDevicesController)
+container.bind(CommentsController).to(CommentsController)
+container.bind(VideosController).to(VideosController)

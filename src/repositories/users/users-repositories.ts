@@ -1,7 +1,8 @@
 import {User, userTypeDB} from '../../database/dbInterface';
 import {UserFilterQuery} from '../../domain/users-service';
+import {injectable} from "inversify";
 
-
+@injectable()
 export class UsersRepositories {
 
     async createNewUser(newUser: userTypeDB) {
