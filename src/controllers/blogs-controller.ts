@@ -1,24 +1,28 @@
-import {BlogsService} from "../domain/blogs-service";
-import {PostsService} from "../domain/posts-service";
+import {BlogsService} from '../domain/blogs-service';
+import {PostsService} from '../domain/posts-service';
 import {
     RequestWithBody,
     RequestWithParams,
     RequestWithParamsAndBody,
     RequestWithParamsAndQuery,
     RequestWithQuery
-} from "../types/requestTypes";
-import {blogsQueryModel} from "../models/blogs-models/blogsQueryModel";
-import {Response} from "express";
-import {blogsOutputModel, blogsQueryRepositories} from "../repositories/blogs/blogs-query-repositories";
-import {ErrorType, httpStatus} from "../types/responseTypes";
-import {blogsURImodel} from "../models/blogs-models/blogsURImodel";
-import {blogTypeDB, postTypeDB} from "../database/dbInterface";
-import {postsQueryModel} from "../models/posts-models/postsQueryModel";
-import {postsOutputModel, postsQueryRepositories} from "../repositories/posts/posts-query-repositories";
-import {CreateBlogInputModel} from "../models/blogs-models/CreateBlogInputModel";
-import {CreatePostInputModel} from "../models/posts-models/CreatePostInputModel";
-import {UpdateBlogInputModel} from "../models/blogs-models/UpdateBlogInputModel";
-import {injectable} from "inversify";
+} from '../types/requestTypes';
+import {blogsQueryModel} from '../models/blogs-models/blogsQueryModel';
+import {Response} from 'express';
+import {blogsOutputModel, blogsQueryRepositories} from '../repositories/blogs/blogs-query-repositories';
+import {ErrorType, httpStatus} from '../types/responseTypes';
+import {blogsURImodel} from '../models/blogs-models/blogsURImodel';
+import {blogTypeDB, postTypeDB} from '../database/dbInterface';
+import {postsQueryModel} from '../models/posts-models/postsQueryModel';
+import {
+    postsOutputModel,
+    postsQueryRepositories,
+    postToOutputModel
+} from '../repositories/posts/posts-query-repositories';
+import {CreateBlogInputModel} from '../models/blogs-models/CreateBlogInputModel';
+import {CreatePostInputModel} from '../models/posts-models/CreatePostInputModel';
+import {UpdateBlogInputModel} from '../models/blogs-models/UpdateBlogInputModel';
+import {injectable} from 'inversify';
 
 @injectable()
 export class BlogsController {
@@ -58,7 +62,8 @@ export class BlogsController {
         }
 
         res.status(httpStatus.OK_200)
-        res.json(await blogsQueryRepositories.getAllBlogsPosts(req.params.id, req.query))
+        // @ts-ignore
+        res.json(await blogsQueryRepositories.getAllBlogsPosts(req.params.id, req.query, req.userId))
     }
 
     async createBlog(req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType | blogTypeDB>) {
@@ -72,7 +77,7 @@ export class BlogsController {
         }
     }
 
-    async createBlogPost(req: RequestWithParamsAndBody<blogsURImodel, CreatePostInputModel>, res: Response<ErrorType | postTypeDB>) {
+    async createBlogPost(req: RequestWithParamsAndBody<blogsURImodel, CreatePostInputModel>, res: Response<ErrorType | postToOutputModel>) {
 
         const blog = await blogsQueryRepositories.getBlogById(req.params.id)
 
@@ -85,7 +90,9 @@ export class BlogsController {
 
         try {
             const id = await this.postsService.createNewPost(req.body)
-            const result = await postsQueryRepositories.getPostById(id)
+
+            // @ts-ignore
+            const result = await postsQueryRepositories.getPostById(id, req.userId)
             res.status(httpStatus.CREATED_201)
             res.json(result)
         } catch (e) {

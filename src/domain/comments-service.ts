@@ -1,7 +1,7 @@
 import {commentsTypeDB} from '../database/dbInterface';
 import {CreateCommentInputModel} from '../models/comments-models/CreateCommentInputModel';
 import {CommentsRepositories} from '../repositories/comments/comments-repositories';
-import {authUserOutputModel} from '../repositories/users/users-query-repositories';
+import {authUserOutputModel} from '../features/users/infrastructure/users-query-repositories';
 import {UpdateCommentInputModel} from '../models/comments-models/UpdateCommentInputModel';
 import {v4 as uuidv4} from 'uuid';
 import {LikesModel} from "../models/likes-model/likesModel";

@@ -1,4 +1,4 @@
-import {AuthService} from "../domain/auth-service";
+import {AuthService} from "../features/auth/application/auth-service";
 import {Request, Response} from "express";
 import {
     securityDevicesQueryRepositories,
@@ -8,7 +8,7 @@ import {jwtService} from "../application/jwt-service";
 import {httpStatus} from "../types/responseTypes";
 import {RequestWithParams} from "../types/requestTypes";
 import {commentsURImodel} from "../models/comments-models/commentsURImodel";
-import {accessDataType} from "../models/auth-models/assessDataType";
+import {accessDataType} from "../features/auth/domain/models/assessDataType";
 import {deleteSecurityDevicesURIModel} from "../models/security-devices-models/deleteSecurityDevicesURImodel";
 import {injectable} from "inversify";
 

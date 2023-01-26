@@ -1,14 +1,15 @@
-import {CreateUserInputModel} from '../models/users-models/CreateUserInputModel';
-import {passwordService} from '../application/password-service';
-import {securityDevicesTypeDB, userTypeDB} from '../database/dbInterface';
-import {UsersRepositories} from '../repositories/users/users-repositories';
+import {CreateUserDTO} from '../../users/domain/dto/CreateUserDTO';
+import {passwordService} from '../../../application/password-service';
+import {securityDevicesTypeDB, User, userTypeDB} from '../../../database/dbInterface';
+import {UsersRepositories} from '../../users/infrastructure/users-repositories';
 import {v4 as uuidv4} from 'uuid';
 import add from 'date-fns/add'
-import {EmailManager} from '../managers/email-manager';
-import {jwtService} from '../application/jwt-service';
-import {accessDataType} from '../models/auth-models/assessDataType';
-import {SecurityDevicesRepositories} from "../repositories/securityDevices/security-devices-repositories";
+import {EmailManager} from '../../../managers/email-manager';
+import {jwtService} from '../../../application/jwt-service';
+import {accessDataType} from '../domain/models/assessDataType';
+import {SecurityDevicesRepositories} from "../../../repositories/securityDevices/security-devices-repositories";
 import {injectable} from "inversify";
+import {HydratedDocument} from 'mongoose';
 
 
 @injectable()
@@ -21,34 +22,36 @@ export class AuthService {
 
     }
 
-    async createUser(userData: CreateUserInputModel) {
+    async createUser(userData: CreateUserDTO) {
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
 
-        const newUser: userTypeDB = new userTypeDB(
+        const newUser: HydratedDocument<userTypeDB> = new User(
             {
-                id: uuidv4(),
-                login: userData.login,
-                email: userData.email,
-                password: passwordHash,
-                salt: passwordSalt,
-                refreshToken: null,
-                createdAt: new Date()
-            },
-            {
-                confirmationCode: uuidv4(),
-                expirationDate: add(new Date(), {
-                    hours: 1
-                }),
-                isConfirmed: false
-            },
-            {
-                recoveryCode: null,
-                expirationDate: null,
+                accountData: {
+                    id: uuidv4(),
+                    login: userData.login,
+                    email: userData.email,
+                    password: passwordHash,
+                    salt: passwordSalt,
+                    refreshToken: null,
+                    createdAt: new Date()
+                },
+                emailConfirmation: {
+                    confirmationCode: uuidv4(),
+                    expirationDate: add(new Date(), {
+                        hours: 1
+                    }),
+                    isConfirmed: false
+                },
+                passwordRecovery: {
+                    recoveryCode: null,
+                    expirationDate: null,
+                }
             }
         )
 
-        const userCreateRes = await this.usersRepository.createNewUser(newUser)
+        const userCreateRes = await this.usersRepository.save(newUser)
 
         try {
             await EmailManager.sendRegistrationEmail(newUser)
@@ -65,6 +68,7 @@ export class AuthService {
         if (user.emailConfirmation.isConfirmed) return false
         if (user.emailConfirmation.confirmationCode !== code) return false
         if (user.emailConfirmation.expirationDate && user.emailConfirmation.expirationDate < new Date()) return false
+
         let result = await this.usersRepository.updateConfirmation(user.accountData.id)
         return result
     }

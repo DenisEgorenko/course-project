@@ -6,8 +6,9 @@ import {postsQueryRepositories} from '../repositories/posts/posts-query-reposito
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {likesAuthorisationMiddleware} from "../middlewares/likes-authorisation-middleware";
 import {container} from "../composition-root";
-import {AuthController} from "../controllers/auth-controller";
+import {AuthController} from "../features/auth/api/auth-controller";
 import {PostsController} from "../controllers/posts-controller";
+import {CommentsRouter, likesBodyValidation} from './comments-router';
 
 export const postsRouter = Router({})
 
@@ -52,9 +53,13 @@ const postsController = container.resolve(PostsController)
 
 // Posts
 // Read Posts
-postsRouter.get('/', postsController.getAllPosts.bind(postsController))
 
-postsRouter.get('/:id', postsController.getPostById.bind(postsController))
+postsRouter.get('/',
+    likesAuthorisationMiddleware,
+    // @ts-ignore
+    postsController.getAllPosts.bind(postsController))
+
+postsRouter.get('/:postId', likesAuthorisationMiddleware, postsController.getPostById.bind(postsController))
 
 postsRouter.post('/',
     authorisationMiddleware,
@@ -66,7 +71,7 @@ postsRouter.post('/',
     postsController.createPost.bind(postsController)
 )
 
-postsRouter.put('/:id',
+postsRouter.put('/:postId',
     authorisationMiddleware,
     titleValidation,
     shortDescriptionValidation,
@@ -76,7 +81,7 @@ postsRouter.put('/:id',
     postsController.updatePost.bind(postsController)
 )
 
-postsRouter.delete('/:id',
+postsRouter.delete('/:postId',
     authorisationMiddleware,
     inputValidationMiddleware,
     postsController.deletePost.bind(postsController)
@@ -91,4 +96,11 @@ postsRouter.post('/:postId/comments',
     commentContentValidation,
     inputValidationMiddleware,
     postsController.createPostComment.bind(postsController)
+)
+
+postsRouter.put('/:postId/like-status',
+    bearerAuthorisationMiddleware,
+    likesBodyValidation,
+    inputValidationMiddleware,
+    postsController.setLikes.bind(postsController)
 )

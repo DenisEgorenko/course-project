@@ -18,7 +18,8 @@ export class CommentsController {
     }
 
     async getCommentById(req: RequestWithParams<commentsURImodel>, res: Response<commentOutputModel>) {
-
+// @ts-ignore
+        console.log(req.userId)
         // @ts-ignore
         const foundComment = await commentsQueryRepositories.getCommentById(req.params.commentId, req.userId)
 

@@ -1,6 +1,6 @@
-import {User, userTypeDB} from '../../database/dbInterface';
+import {User, userTypeDB} from '../../../database/dbInterface';
 import {Sort, WithId} from 'mongodb';
-import {usersQueryModel} from '../../models/users-models/usersQueryModel';
+import {usersQueryModel} from '../domain/models/usersQueryModel';
 
 
 export const usersQueryRepositories = {

@@ -3,7 +3,8 @@ import {postTypeDB} from '../database/dbInterface';
 import {PostsRepositories} from '../repositories/posts/posts-repositories';
 import {UpdatePostInputModel} from '../models/posts-models/UpdatePostInputModel';
 import {v4 as uuidv4} from 'uuid';
-import {injectable} from "inversify";
+import {injectable} from 'inversify';
+import {LikesModel} from '../models/likes-model/likesModel';
 
 
 export type updatePostQuery = {
@@ -35,7 +36,12 @@ export class PostsService {
             requestData.content,
             requestData.blogId,
             requestData.blogId,
-            new Date()
+            new Date(),
+            {
+                likes: [],
+                dislikes: [],
+                newestLikes: []
+            }
         )
 
         try {
@@ -69,6 +75,25 @@ export class PostsService {
             id: id
         }
         return await this.postsRepositories.deletePost(filterQuery)
+    }
+
+    async setLikeStatus(postId: string, userId: string, likeStatus: LikesModel) {
+
+        if (likeStatus === LikesModel.Like) {
+            await this.postsRepositories.setLike(postId, userId)
+            return
+        }
+
+        if (likeStatus === LikesModel.Dislike) {
+            await this.postsRepositories.setDislike(postId, userId)
+            return
+        }
+
+        if (likeStatus === LikesModel.None) {
+            await this.postsRepositories.removeLikeAndDislike(postId, userId)
+            return
+        }
+
     }
 }
 

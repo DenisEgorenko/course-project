@@ -1,19 +1,19 @@
-import {AuthService} from "../domain/auth-service";
-import {UsersService} from "../domain/users-service";
+import {AuthService} from "../application/auth-service";
+import {UsersService} from "../../users/application/users-service";
 import {Request, Response} from "express";
-import {ErrorType, httpStatus} from "../types/responseTypes";
-import {authUserOutputModel, usersQueryRepositories} from "../repositories/users/users-query-repositories";
-import {RequestWithBody} from "../types/requestTypes";
-import {authInputModel} from "../models/auth-models/authInputModel";
-import {jwtService} from "../application/jwt-service";
-import {CreateUserInputModel} from "../models/users-models/CreateUserInputModel";
-import {CreateBlogInputModel} from "../models/auth-models/EmailConfirmationInputModel";
-import {resendInputModel} from "../models/auth-models/resendInputModel";
-import {accessDataType} from "../models/auth-models/assessDataType";
-import {securityDevicesQueryRepositories} from "../repositories/securityDevices/security-devices-query-repositories";
-import {PasswordRecoveryInputModel} from "../models/auth-models/passwordRecoveryInputModel";
-import {NewPasswordInputModel} from "../models/auth-models/newPasswordInputModel";
-import {userTypeDB} from "../database/dbInterface";
+import {ErrorType, httpStatus} from "../../../types/responseTypes";
+import {authUserOutputModel, usersQueryRepositories} from "../../users/infrastructure/users-query-repositories";
+import {RequestWithBody} from "../../../types/requestTypes";
+import {authInputModel} from "../domain/dto/authInputModel";
+import {jwtService} from "../../../application/jwt-service";
+import {CreateUserDTO} from "../../users/domain/dto/CreateUserDTO";
+import {CreateBlogInputModel} from "../domain/dto/EmailConfirmationInputModel";
+import {resendInputModel} from "../domain/dto/resendInputModel";
+import {accessDataType} from "../domain/models/assessDataType";
+import {securityDevicesQueryRepositories} from "../../../repositories/securityDevices/security-devices-query-repositories";
+import {PasswordRecoveryInputModel} from "../domain/dto/passwordRecoveryInputModel";
+import {NewPasswordInputModel} from "../domain/dto/newPasswordInputModel";
+import {userTypeDB} from "../../../database/dbInterface";
 import * as dotenv from 'dotenv'
 import {injectable} from "inversify";
 
@@ -80,7 +80,7 @@ export class AuthController {
         }
     }
 
-    async registration(req: RequestWithBody<CreateUserInputModel>, res: Response<ErrorType>) {
+    async registration(req: RequestWithBody<CreateUserDTO>, res: Response<ErrorType>) {
         const user = await this.authService.createUser(req.body)
         if (user) {
             res.sendStatus(httpStatus.NO_CONTENT_204)

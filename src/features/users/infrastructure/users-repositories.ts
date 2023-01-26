@@ -1,19 +1,24 @@
-import {User, userTypeDB} from '../../database/dbInterface';
-import {UserFilterQuery} from '../../domain/users-service';
-import {injectable} from "inversify";
+import {User, userTypeDB} from '../../../database/dbInterface';
+import {UserFilterQuery} from '../application/users-service';
+import {injectable} from 'inversify';
+import {HydratedDocument} from 'mongoose';
 
 @injectable()
 export class UsersRepositories {
 
-    async createNewUser(newUser: userTypeDB) {
-        try {
-            const newUserEntity = new User(newUser)
-            await newUserEntity.save()
-            return true
-        } catch (e) {
-            return false
-        }
+    async save(newUser: HydratedDocument<userTypeDB>) {
+        await newUser.save()
     }
+
+    // async createNewUser(newUser: userTypeDB) {
+    //     try {
+    //         const newUserEntity = new User(newUser)
+    //         await newUserEntity.save()
+    //         return true
+    //     } catch (e) {
+    //         return false
+    //     }
+    // }
 
     async deleteUser(filterQuery: UserFilterQuery): Promise<boolean> {
         const result = await User.deleteOne(filterQuery)

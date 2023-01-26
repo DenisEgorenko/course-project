@@ -1,11 +1,11 @@
 import {Router} from 'express';
 import {body, cookie} from 'express-validator';
 import {inputValidationMiddleware, inputValidationMiddleware_401} from '../middlewares/input-validation-middleware';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
+import {usersQueryRepositories} from '../features/users/infrastructure/users-query-repositories';
 import {bearerAuthorisationMiddleware} from '../middlewares/bearer-uthorisation-middleware';
 import {requestsAttemptsAuthorisationMiddleware} from "../middlewares/requests-attempts-middleware";
 import {container} from "../composition-root";
-import {AuthController} from "../controllers/auth-controller";
+import {AuthController} from "../features/auth/api/auth-controller";
 
 export const authRouter = Router({})
 

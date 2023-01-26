@@ -28,7 +28,7 @@ export const blogsQueryRepositories = {
         return blogsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
     },
 
-    async getAllBlogsPosts(id: string, query: postsQueryModel) {
+    async getAllBlogsPosts(id: string, query: postsQueryModel, userId: string) {
 
         const sortBy = query.sortBy ? query.sortBy : 'createdAt'
         const sortDirection: Sort = query.sortDirection === 'asc' ? 1 : -1
@@ -44,7 +44,7 @@ export const blogsQueryRepositories = {
 
         const items = await Post.find({blogId: id}).sort(sort).skip(skip).limit(pageSize);
 
-        return postsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items)
+        return postsToOutputModel(pagesCount, pageNumber, pageSize, totalCount, items, userId)
     },
 
     async getBlogById(id: string) {

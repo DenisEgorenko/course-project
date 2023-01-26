@@ -1,15 +1,15 @@
-import {UsersService} from "../domain/users-service";
-import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/requestTypes";
-import {usersQueryModel} from "../models/users-models/usersQueryModel";
+import {UsersService} from "../application/users-service";
+import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../../../types/requestTypes";
+import {usersQueryModel} from "../domain/models/usersQueryModel";
 import {Response} from "express";
 import {
     userOutputModel,
     usersOutputModel,
     usersQueryRepositories
-} from "../repositories/users/users-query-repositories";
-import {ErrorType, httpStatus} from "../types/responseTypes";
-import {CreateUserInputModel} from "../models/users-models/CreateUserInputModel";
-import {usersURImodel} from "../models/users-models/usersURImodel";
+} from "../infrastructure/users-query-repositories";
+import {ErrorType, httpStatus} from "../../../types/responseTypes";
+import {CreateUserDTO} from "../domain/dto/CreateUserDTO";
+import {usersURImodel} from "../domain/models/usersURImodel";
 import {injectable} from "inversify";
 
 
@@ -24,7 +24,7 @@ export class UsersController {
         res.json(await usersQueryRepositories.getAllUsers(req.query))
     }
 
-    async createNewUser(req: RequestWithBody<CreateUserInputModel>, res: Response<ErrorType | userOutputModel>) {
+    async createNewUser(req: RequestWithBody<CreateUserDTO>, res: Response<ErrorType | userOutputModel>) {
         try {
             const id = await this.usersService.createNewUser(req.body)
             const result = await usersQueryRepositories.getUserById(id)

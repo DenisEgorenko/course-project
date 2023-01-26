@@ -1,5 +1,5 @@
 import {resolutions} from '../models/videos-models/resolutionsModel';
-import mongoose from "mongoose";
+import mongoose, {Model} from 'mongoose';
 
 
 // types
@@ -23,7 +23,16 @@ export class postTypeDB {
         public content: string,
         public blogId: string,
         public blogName: string,
-        public createdAt: Date
+        public createdAt: Date,
+        public extendedLikesInfo: {
+            likes: string[],
+            dislikes: string[],
+            newestLikes: {
+                addedAt: Date,
+                userId: string,
+                login: string
+            } []
+        }
     ) {
     }
 }
@@ -111,10 +120,26 @@ const postSchema = new mongoose.Schema<postTypeDB>({
     content: {type: String, required: true},
     blogId: {type: String, required: true},
     blogName: {type: String, required: true},
-    createdAt: {type: Date, required: true}
+    createdAt: {type: Date, required: true},
+    extendedLikesInfo: {
+        likes: {type: [String], required: true},
+        dislikes: {type: [String], required: true},
+        newestLikes: {
+            type: [{
+                addedAt: Date,
+                userId: String,
+                login: String
+            }], required: true
+        }
+    }
 })
 export const Post = mongoose.model('posts', postSchema)
 
+
+export type UserAccountDBMethodsType = {
+    canBeConfirmed: () => boolean
+}
+type userModelType = Model<userTypeDB, {}, UserAccountDBMethodsType>
 const userSchema = new mongoose.Schema<userTypeDB>({
     accountData: {
         id: {type: String, required: true},
@@ -135,7 +160,8 @@ const userSchema = new mongoose.Schema<userTypeDB>({
         expirationDate: {type: Date, required: false},
     }
 })
-export const User = mongoose.model('users', userSchema)
+export const User = mongoose.model<userTypeDB, userModelType>('users', userSchema)
+
 
 const commentSchema = new mongoose.Schema<commentsTypeDB>({
     id: {type: String, required: true},

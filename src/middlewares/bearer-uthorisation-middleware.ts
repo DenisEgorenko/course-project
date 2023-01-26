@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import {validationResult} from 'express-validator';
 import {httpStatus} from '../types/responseTypes';
 import {jwtService} from '../application/jwt-service';
-import {usersQueryRepositories} from '../repositories/users/users-query-repositories';
+import {usersQueryRepositories} from '../features/users/infrastructure/users-query-repositories';
 
 const auth = {login: 'admin', password: 'qwerty'}
 

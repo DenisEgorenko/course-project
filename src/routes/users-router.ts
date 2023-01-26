@@ -3,7 +3,7 @@ import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {container} from "../composition-root";
-import {UsersController} from "../controllers/users-controller";
+import {UsersController} from "../features/users/api/users-controller";
 
 export const usersRouter = Router({})
 
