@@ -44,6 +44,8 @@ export class PostsController {
     async getAllPosts(req: RequestWithQuery<postsQueryModel>, res: Response<postsOutputModel>) {
         res.status(httpStatus.OK_200)
         // @ts-ignore
+        console.log(req.userId)
+        // @ts-ignore
         res.json(await postsQueryRepositories.getAllPosts(req.query, req.userId))
     }
 

@@ -94,7 +94,8 @@ export const postToOutputModel = (post: postTypeDB,
             likesCount: post.extendedLikesInfo.likes.length,
             dislikesCount: post.extendedLikesInfo.dislikes.length,
             myStatus: post.extendedLikesInfo.likes.includes(userId) ? LikesModel.Like
-                : post.extendedLikesInfo.dislikes.includes(userId) ? LikesModel.Dislike : LikesModel.None,
+                : post.extendedLikesInfo.dislikes.includes(userId) ? LikesModel.Dislike
+                    : LikesModel.None,
             newestLikes: post.extendedLikesInfo.newestLikes
                 .sort((a, b) => (a.addedAt > b.addedAt) ? -1 : ((b.addedAt > a.addedAt) ? 1 : 0))
                 .map(likeInfo => ({
