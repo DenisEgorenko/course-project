@@ -3,8 +3,9 @@ import {body} from 'express-validator';
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
 import {authorisationMiddleware} from '../middlewares/authorisation-middleware';
 import {contentValidation, shortDescriptionValidation, titleValidation} from './posts-router';
-import {container} from "../composition-root";
-import {BlogsController} from "../controllers/blogs-controller";
+import {container} from '../composition-root';
+import {BlogsController} from '../controllers/blogs-controller';
+import {likesAuthorisationMiddleware} from '../middlewares/likes-authorisation-middleware';
 
 export const blogsRouter = Router({})
 
@@ -46,7 +47,11 @@ blogsRouter.get('/', blogsController.getAllBlogs.bind(blogsController))
 
 blogsRouter.get('/:id', blogsController.getBlogById.bind(blogsController))
 
-blogsRouter.get('/:id/posts', blogsController.getBlogPosts.bind(blogsController))
+
+blogsRouter.get('/:id/posts', likesAuthorisationMiddleware,
+    // @ts-ignore
+    blogsController.getBlogPosts.bind(blogsController)
+)
 
 // Create blog
 blogsRouter.post('/',
