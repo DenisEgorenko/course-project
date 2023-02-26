@@ -1,10 +1,11 @@
-import {User, userTypeDB} from '../../../database/dbInterface';
 import {UsersRepositories} from '../infrastructure/users-repositories';
 import {CreateUserDTO} from '../domain/dto/CreateUserDTO';
 import {authInputModel} from '../../auth/domain/dto/authInputModel';
 import {passwordService} from '../../../application/password-service';
 import {injectable} from 'inversify';
 import {HydratedDocument} from 'mongoose';
+import {userTypeDB} from '../../../database/dbInterface';
+import {User} from '../domain/UserEntity';
 
 
 export type UserFilterQuery = {

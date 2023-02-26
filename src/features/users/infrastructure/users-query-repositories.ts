@@ -1,6 +1,7 @@
-import {User, userTypeDB} from '../../../database/dbInterface';
 import {Sort, WithId} from 'mongodb';
 import {usersQueryModel} from '../domain/models/usersQueryModel';
+import {User} from '../domain/UserEntity';
+import {userTypeDB} from '../../../database/dbInterface';
 
 
 export const usersQueryRepositories = {
@@ -20,7 +21,6 @@ export const usersQueryRepositories = {
         if (!filter.$or.length) {
             filter.$or.push({})
         }
-
 
         const sortBy = query.sortBy ? query.sortBy : 'createdAt'
         const sortDirection: Sort = query.sortDirection === 'asc' ? 1 : -1
@@ -61,20 +61,11 @@ export const usersQueryRepositories = {
         }
     },
 
-
     async getUserByEmailOrLogin(login?: string, email?: string) {
         const foundBlog = await User.find(
             {$or: [{'accountData.email': email ? email : login}, {'accountData.login': login ? login : email}]})
         return foundBlog[0]
     },
-
-
-    // async getUserByEmailOrLogin(loginOrEmail: string) {
-    //     const foundBlog = await usersDatabase.find(
-    //         {$or: [{'accountData.email': loginOrEmail}, {'accountData.login': loginOrEmail}]}, {projection: {_id: 0}}
-    //     ).toArray()
-    //     return foundBlog[0]
-    // },
 
     async getUserByConfirmationCode(code: string) {
         const foundUser = await User.find(

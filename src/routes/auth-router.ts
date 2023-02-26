@@ -106,19 +106,6 @@ const authController = container.resolve(AuthController)
 
 //Routes
 
-authRouter.get('/me',
-    bearerAuthorisationMiddleware,
-    authController.authMe.bind(authController)
-)
-
-authRouter.post('/login',
-    requestsAttemptsAuthorisationMiddleware,
-    userPasswordValidation,
-    userLoginOrEmailValidation,
-    inputValidationMiddleware,
-    authController.login.bind(authController)
-)
-
 authRouter.post('/registration',
     requestsAttemptsAuthorisationMiddleware,
     userPasswordValidation,
@@ -135,6 +122,23 @@ authRouter.post('/registration-confirmation',
     codeConfirmedValidation,
     inputValidationMiddleware,
     authController.registrationConfirmation.bind(authController)
+)
+
+
+
+
+
+authRouter.get('/me',
+    bearerAuthorisationMiddleware,
+    authController.authMe.bind(authController)
+)
+
+authRouter.post('/login',
+    requestsAttemptsAuthorisationMiddleware,
+    userPasswordValidation,
+    userLoginOrEmailValidation,
+    inputValidationMiddleware,
+    authController.login.bind(authController)
 )
 
 authRouter.post('/registration-email-resending',

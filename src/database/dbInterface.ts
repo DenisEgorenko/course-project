@@ -136,31 +136,7 @@ const postSchema = new mongoose.Schema<postTypeDB>({
 export const Post = mongoose.model('posts', postSchema)
 
 
-export type UserAccountDBMethodsType = {
-    canBeConfirmed: () => boolean
-}
-type userModelType = Model<userTypeDB, {}, UserAccountDBMethodsType>
-const userSchema = new mongoose.Schema<userTypeDB>({
-    accountData: {
-        id: {type: String, required: true},
-        login: {type: String, required: true},
-        email: {type: String, required: true},
-        password: {type: String, required: true},
-        salt: {type: String, required: true},
-        refreshToken: {type: String, required: false},
-        createdAt: {type: Date, required: true}
-    },
-    emailConfirmation: {
-        confirmationCode: {type: String, required: false},
-        expirationDate: {type: Date, required: false},
-        isConfirmed: {type: Boolean, required: false}
-    },
-    passwordRecovery: {
-        recoveryCode: {type: String, required: false},
-        expirationDate: {type: Date, required: false},
-    }
-})
-export const User = mongoose.model<userTypeDB, userModelType>('users', userSchema)
+
 
 
 const commentSchema = new mongoose.Schema<commentsTypeDB>({

@@ -1,15 +1,17 @@
 import {CreateUserDTO} from '../../users/domain/dto/CreateUserDTO';
 import {passwordService} from '../../../application/password-service';
-import {securityDevicesTypeDB, User, userTypeDB} from '../../../database/dbInterface';
+import {securityDevicesTypeDB, userTypeDB} from '../../../database/dbInterface';
 import {UsersRepositories} from '../../users/infrastructure/users-repositories';
 import {v4 as uuidv4} from 'uuid';
 import add from 'date-fns/add'
 import {EmailManager} from '../../../managers/email-manager';
 import {jwtService} from '../../../application/jwt-service';
 import {accessDataType} from '../domain/models/assessDataType';
-import {SecurityDevicesRepositories} from "../../../repositories/securityDevices/security-devices-repositories";
-import {injectable} from "inversify";
+import {SecurityDevicesRepositories} from '../../../repositories/securityDevices/security-devices-repositories';
+import {injectable} from 'inversify';
 import {HydratedDocument} from 'mongoose';
+import {usersQueryRepositories} from '../../users/infrastructure/users-query-repositories';
+import {User} from '../../users/domain/UserEntity';
 
 
 @injectable()
@@ -26,30 +28,32 @@ export class AuthService {
         const passwordSalt = await passwordService.generateSalt()
         const passwordHash = await passwordService.generateHash(userData.password, passwordSalt)
 
-        const newUser: HydratedDocument<userTypeDB> = new User(
-            {
-                accountData: {
-                    id: uuidv4(),
-                    login: userData.login,
-                    email: userData.email,
-                    password: passwordHash,
-                    salt: passwordSalt,
-                    refreshToken: null,
-                    createdAt: new Date()
-                },
-                emailConfirmation: {
-                    confirmationCode: uuidv4(),
-                    expirationDate: add(new Date(), {
-                        hours: 1
-                    }),
-                    isConfirmed: false
-                },
-                passwordRecovery: {
-                    recoveryCode: null,
-                    expirationDate: null,
-                }
-            }
-        )
+        // const newUser: HydratedDocument<userTypeDB> = new User(
+        //     {
+        //         accountData: {
+        //             id: uuidv4(),
+        //             login: userData.login,
+        //             email: userData.email,
+        //             password: passwordHash,
+        //             salt: passwordSalt,
+        //             refreshToken: null,
+        //             createdAt: new Date()
+        //         },
+        //         emailConfirmation: {
+        //             confirmationCode: uuidv4(),
+        //             expirationDate: add(new Date(), {
+        //                 hours: 1
+        //             }),
+        //             isConfirmed: false
+        //         },
+        //         passwordRecovery: {
+        //             recoveryCode: null,
+        //             expirationDate: null,
+        //         }
+        //     }
+        // )
+
+        const newUser = User.createUser(userData.login, userData.email, passwordHash, passwordSalt)
 
         const userCreateRes = await this.usersRepository.save(newUser)
 
@@ -62,16 +66,18 @@ export class AuthService {
         return userCreateRes
     }
 
-    async confirmEmail(code: string, user: userTypeDB) {
+    async confirmEmail(code: string) {
+
+        let user = await usersQueryRepositories.getUserByConfirmationCode(code)
 
         if (!user) return false
-        if (user.emailConfirmation.isConfirmed) return false
-        if (user.emailConfirmation.confirmationCode !== code) return false
-        if (user.emailConfirmation.expirationDate && user.emailConfirmation.expirationDate < new Date()) return false
 
-        let result = await this.usersRepository.updateConfirmation(user.accountData.id)
+        user.confirm(code)
+
+        const result = await this.usersRepository.save(user)
         return result
     }
+
 
     async resendConfirmEmail(email: string, user: userTypeDB) {
         if (!user) return false

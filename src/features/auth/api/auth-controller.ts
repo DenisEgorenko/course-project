@@ -1,21 +1,23 @@
-import {AuthService} from "../application/auth-service";
-import {UsersService} from "../../users/application/users-service";
-import {Request, Response} from "express";
-import {ErrorType, httpStatus} from "../../../types/responseTypes";
-import {authUserOutputModel, usersQueryRepositories} from "../../users/infrastructure/users-query-repositories";
-import {RequestWithBody} from "../../../types/requestTypes";
-import {authInputModel} from "../domain/dto/authInputModel";
-import {jwtService} from "../../../application/jwt-service";
-import {CreateUserDTO} from "../../users/domain/dto/CreateUserDTO";
-import {CreateBlogInputModel} from "../domain/dto/EmailConfirmationInputModel";
-import {resendInputModel} from "../domain/dto/resendInputModel";
-import {accessDataType} from "../domain/models/assessDataType";
-import {securityDevicesQueryRepositories} from "../../../repositories/securityDevices/security-devices-query-repositories";
-import {PasswordRecoveryInputModel} from "../domain/dto/passwordRecoveryInputModel";
-import {NewPasswordInputModel} from "../domain/dto/newPasswordInputModel";
-import {userTypeDB} from "../../../database/dbInterface";
+import {AuthService} from '../application/auth-service';
+import {UsersService} from '../../users/application/users-service';
+import {Request, Response} from 'express';
+import {ErrorType, httpStatus} from '../../../types/responseTypes';
+import {authUserOutputModel, usersQueryRepositories} from '../../users/infrastructure/users-query-repositories';
+import {RequestWithBody} from '../../../types/requestTypes';
+import {authInputModel} from '../domain/dto/authInputModel';
+import {jwtService} from '../../../application/jwt-service';
+import {CreateUserDTO} from '../../users/domain/dto/CreateUserDTO';
+import {CreateBlogInputModel} from '../domain/dto/EmailConfirmationInputModel';
+import {resendInputModel} from '../domain/dto/resendInputModel';
+import {accessDataType} from '../domain/models/assessDataType';
+import {
+    securityDevicesQueryRepositories
+} from '../../../repositories/securityDevices/security-devices-query-repositories';
+import {PasswordRecoveryInputModel} from '../domain/dto/passwordRecoveryInputModel';
+import {NewPasswordInputModel} from '../domain/dto/newPasswordInputModel';
+import {userTypeDB} from '../../../database/dbInterface';
 import * as dotenv from 'dotenv'
-import {injectable} from "inversify";
+import {injectable} from 'inversify';
 
 dotenv.config()
 
@@ -31,6 +33,29 @@ export class AuthController {
     ) {
 
     }
+
+    async registration(req: RequestWithBody<CreateUserDTO>, res: Response<ErrorType>) {
+        const user = await this.authService.createUser(req.body)
+        if (user) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+            return
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+            return
+        }
+    }
+
+    async registrationConfirmation(req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType>) {
+
+        const result = await this.authService.confirmEmail(req.body.code)
+
+        if (result) {
+            res.sendStatus(httpStatus.NO_CONTENT_204)
+        } else {
+            res.sendStatus(httpStatus.BAD_REQUEST_400)
+        }
+    }
+
 
     async authMe(req: Request, res: Response<ErrorType | authUserOutputModel>) {
         // @ts-ignore
@@ -77,29 +102,6 @@ export class AuthController {
 
         } catch (e) {
             res.sendStatus(httpStatus.UNATHORIZED_401)
-        }
-    }
-
-    async registration(req: RequestWithBody<CreateUserDTO>, res: Response<ErrorType>) {
-        const user = await this.authService.createUser(req.body)
-        if (user) {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
-            return
-        } else {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
-            return
-        }
-    }
-
-    async registrationConfirmation(req: RequestWithBody<CreateBlogInputModel>, res: Response<ErrorType>) {
-        let user = await usersQueryRepositories.getUserByConfirmationCode(req.body.code)
-
-        const result = await this.authService.confirmEmail(req.body.code, user)
-
-        if (result) {
-            res.sendStatus(httpStatus.NO_CONTENT_204)
-        } else {
-            res.sendStatus(httpStatus.BAD_REQUEST_400)
         }
     }
 

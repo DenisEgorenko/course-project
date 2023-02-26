@@ -1,13 +1,14 @@
-import {User, userTypeDB} from '../../../database/dbInterface';
 import {UserFilterQuery} from '../application/users-service';
 import {injectable} from 'inversify';
 import {HydratedDocument} from 'mongoose';
+import {userTypeDB} from '../../../database/dbInterface';
+import {User} from '../domain/UserEntity';
 
 @injectable()
 export class UsersRepositories {
 
-    async save(newUser: HydratedDocument<userTypeDB>) {
-        await newUser.save()
+    async save(model: HydratedDocument<userTypeDB>) {
+        return await model.save()
     }
 
     // async createNewUser(newUser: userTypeDB) {
@@ -25,13 +26,13 @@ export class UsersRepositories {
         return result.deletedCount >= 1
     }
 
-    async updateConfirmation(userId: string) {
-        const result = await User.updateOne(
-            {'accountData.id': userId},
-            {$set: {'emailConfirmation.isConfirmed': true}}
-        )
-        return result.modifiedCount >= 1;
-    }
+    // async updateConfirmation(userId: string) {
+    //     const result = await User.updateOne(
+    //         {'accountData.id': userId},
+    //         {$set: {'emailConfirmation.isConfirmed': true}}
+    //     )
+    //     return result.modifiedCount >= 1;
+    // }
 
     async updateRefreshToken(userId: string, refreshToken: string | null) {
         const result = await User.updateOne(

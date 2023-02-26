@@ -4,12 +4,13 @@ import {videosRouter} from './routes/videos-router';
 import {blogsRouter} from './routes/blogs-router';
 import {postsRouter} from './routes/posts-router';
 import {runDb} from './database/db';
-import {Blog, Comment, Post, User, Video} from './database/dbInterface';
+import {Blog, Comment, Post, Video} from './database/dbInterface';
 import {usersRouter} from './routes/users-router';
 import {authRouter} from './routes/auth-router';
 import {CommentsRouter} from './routes/comments-router';
 import cookies from 'cookie-parser'
 import {SecurityDevicesRouter} from "./routes/security-devices-router";
+import {User} from './features/users/domain/UserEntity';
 
 
 const express = require('express')
